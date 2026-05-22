@@ -22,5 +22,5 @@ data class MaintenanceEntity(
     val vehiclePlate: String,
     val date: String,
     val description: String,
-    val workshopName: String
+    val workshopName: String?
 )

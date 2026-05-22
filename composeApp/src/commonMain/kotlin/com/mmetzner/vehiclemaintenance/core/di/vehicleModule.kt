@@ -7,6 +7,6 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val vehicleModule = module {
-    single<VehicleRepository> { VehicleRepositoryImpl(get()) }
+    single<VehicleRepository> { VehicleRepositoryImpl(get(), get()) }
     viewModel { VehicleSearchViewModel(get()) }
 }

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "f5fd46508118358e783e2b8910827b3c",
+    "identityHash": "4dc085f5d82bd4a1f4921147f0a2e688",
     "entities": [
       {
         "tableName": "vehicles",
@@ -42,7 +42,7 @@
       },
       {
         "tableName": "maintenances",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `vehiclePlate` TEXT NOT NULL, `date` TEXT NOT NULL, `description` TEXT NOT NULL, `workshopName` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`vehiclePlate`) REFERENCES `vehicles`(`plate`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `vehiclePlate` TEXT NOT NULL, `date` TEXT NOT NULL, `description` TEXT NOT NULL, `workshopName` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`vehiclePlate`) REFERENCES `vehicles`(`plate`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
@@ -71,8 +71,7 @@
           {
             "fieldPath": "workshopName",
             "columnName": "workshopName",
-            "affinity": "TEXT",
-            "notNull": true
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -163,7 +162,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f5fd46508118358e783e2b8910827b3c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4dc085f5d82bd4a1f4921147f0a2e688')"
     ]
   }
 }
