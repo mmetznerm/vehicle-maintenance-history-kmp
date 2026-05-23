@@ -73,7 +73,7 @@ class LoginViewModelTest {
 
         assertTrue(repository.loginCalled)
         assertFalse(viewModel.state.value.isAuthenticated)
-        assertTrue(viewModel.state.value.errorMessage?.contains("Could not sign in") == true)
+        assertTrue(viewModel.state.value.errorMessage?.contains("Could not connect") == true)
     }
 
     @Test

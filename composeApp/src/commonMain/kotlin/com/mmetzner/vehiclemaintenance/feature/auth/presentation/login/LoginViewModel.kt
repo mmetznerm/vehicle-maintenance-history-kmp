@@ -2,6 +2,7 @@ package com.mmetzner.vehiclemaintenance.feature.auth.presentation.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mmetzner.vehiclemaintenance.core.network.toLoginErrorMessage
 import com.mmetzner.vehiclemaintenance.feature.auth.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,7 +58,7 @@ class LoginViewModel(
                 } else {
                     it.copy(
                         isLoading = false,
-                        errorMessage = "Could not sign in. Check your credentials and try again."
+                        errorMessage = result.exceptionOrNull().toLoginErrorMessage()
                     )
                 }
             }

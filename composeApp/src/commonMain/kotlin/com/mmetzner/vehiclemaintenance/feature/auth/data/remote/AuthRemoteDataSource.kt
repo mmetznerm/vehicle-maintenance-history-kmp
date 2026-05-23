@@ -1,6 +1,7 @@
 package com.mmetzner.vehiclemaintenance.feature.auth.data.remote
 
 import com.mmetzner.vehiclemaintenance.core.network.ApiConfig
+import com.mmetzner.vehiclemaintenance.core.network.toNetworkRequestException
 import com.mmetzner.vehiclemaintenance.feature.auth.data.remote.dto.LoginRequest
 import com.mmetzner.vehiclemaintenance.feature.auth.data.remote.dto.LoginResponse
 import io.ktor.client.HttpClient
@@ -22,11 +23,9 @@ class AuthRemoteDataSource(
         }
 
         if (!response.status.isSuccess()) {
-            throw AuthRequestException("Login failed. Code: ${response.status.value}")
+            throw response.status.toNetworkRequestException("Login")
         }
 
         return response.body()
     }
 }
-
-class AuthRequestException(message: String) : Exception(message)

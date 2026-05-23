@@ -2,6 +2,7 @@
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mmetzner.vehiclemaintenance.core.network.toVehicleSearchErrorMessage
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,7 +38,9 @@ class VehicleSearchViewModel(
 
             if (syncResult.isFailure) {
                 if (_state.value !is VehicleSearchState.Success) {
-                    _state.value = VehicleSearchState.Error("Você está offline e este veículo não está no cache local.")
+                    _state.value = VehicleSearchState.Error(
+                        syncResult.exceptionOrNull().toVehicleSearchErrorMessage()
+                    )
                 }
             }
         }

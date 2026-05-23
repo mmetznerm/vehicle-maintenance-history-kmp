@@ -1,6 +1,7 @@
 package com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote
 
 import com.mmetzner.vehiclemaintenance.core.network.ApiConfig
+import com.mmetzner.vehiclemaintenance.core.network.toNetworkRequestException
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.MaintenanceResponse
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.VehicleResponse
 import io.ktor.client.HttpClient
@@ -20,7 +21,7 @@ class VehicleRemoteDataSource(
         val response = httpClient.get("${apiConfig.normalizedBaseUrl}/v1/vehicles/$plate")
 
         if (!response.status.isSuccess()) {
-            throw RemoteRequestException("Failed to fetch vehicle. Code: ${response.status.value}")
+            throw response.status.toNetworkRequestException("Fetch vehicle")
         }
 
         return response.body()
@@ -33,7 +34,7 @@ class VehicleRemoteDataSource(
         }
 
         if (!response.status.isSuccess()) {
-            throw RemoteRequestException("Failed to create vehicle. Code: ${response.status.value}")
+            throw response.status.toNetworkRequestException("Create vehicle")
         }
     }
 
@@ -44,9 +45,7 @@ class VehicleRemoteDataSource(
         }
 
         if (!response.status.isSuccess()) {
-            throw RemoteRequestException("Failed to create maintenance. Code: ${response.status.value}")
+            throw response.status.toNetworkRequestException("Create maintenance")
         }
     }
 }
-
-class RemoteRequestException(message: String) : Exception(message)

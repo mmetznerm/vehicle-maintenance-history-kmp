@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir *)",
+      "Bash(Get-Content *)",
+      "Bash(./gradlew assembleDebug *)",
+      "Bash(New-Item -ItemType Directory -Force \"composeApp\\\\src\\\\commonMain\\\\kotlin\\\\com\\\\mmetzner\\\\vehiclemaintenance\\\\feature\\\\vehicle\\\\domain\\\\model\")",
+      "Bash(Move-Item \"composeApp\\\\src\\\\commonMain\\\\kotlin\\\\com\\\\mmetzner\\\\vehiclemaintenance\\\\feature\\\\vehicle\\\\domain\\\\Vehicle.kt\" \"composeApp\\\\src\\\\commonMain\\\\kotlin\\\\com\\\\mmetzner\\\\vehiclemaintenance\\\\feature\\\\vehicle\\\\domain\\\\model\\\\Vehicle.kt\")",
+      "Bash(Move-Item \"composeApp\\\\src\\\\commonMain\\\\kotlin\\\\com\\\\mmetzner\\\\vehiclemaintenance\\\\feature\\\\vehicle\\\\domain\\\\Maintenance.kt\" \"composeApp\\\\src\\\\commonMain\\\\kotlin\\\\com\\\\mmetzner\\\\vehiclemaintenance\\\\feature\\\\vehicle\\\\domain\\\\model\\\\Maintenance.kt\")",
+      "PowerShell(New-Item *)",
+      "PowerShell(Move-Item *)"
+    ]
+  }
+}
