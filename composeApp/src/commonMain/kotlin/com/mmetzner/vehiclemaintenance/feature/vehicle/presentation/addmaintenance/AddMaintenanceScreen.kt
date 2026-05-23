@@ -3,7 +3,7 @@
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,10 +36,10 @@ fun AddMaintenanceScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nova ManutenÃ§Ã£o") },
+                title = { Text("Nova Manutenção") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
                     }
                 }
             )
@@ -54,7 +54,7 @@ fun AddMaintenanceScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "VeÃ­culo: ${state.vehiclePlate}",
+                text = "Veículo: ${state.vehiclePlate}",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.Start)
@@ -86,14 +86,14 @@ fun AddMaintenanceScreen(
             OutlinedTextField(
                 value = state.workshopName,
                 onValueChange = { viewModel.onEvent(AddMaintenanceEvent.UpdateWorkshop(it)) },
-                label = { Text("Oficina / MecÃ¢nico") },
+                label = { Text("Oficina / Mecânico") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = state.description,
                 onValueChange = { viewModel.onEvent(AddMaintenanceEvent.UpdateDescription(it)) },
-                label = { Text("DescriÃ§Ã£o do ServiÃ§o") },
+                label = { Text("Descrição do Serviço") },
                 modifier = Modifier.fillMaxWidth(),
                 minLines = 3
             )
@@ -119,7 +119,7 @@ fun AddMaintenanceScreen(
                 } else {
                     Icon(Icons.Default.Save, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Salvar ManutenÃ§Ã£o")
+                    Text("Salvar Manutenção")
                 }
             }
         }

@@ -43,7 +43,7 @@ class AddVehicleViewModelTest {
         )
         advanceUntilIdle()
 
-        assertNotNull(repository.addedVehicle, "O veÃ­culo deveria ter sido enviado ao repositÃ³rio")
+        assertNotNull(repository.addedVehicle, "O veículo deveria ter sido enviado ao repositório")
         assertEquals("ABC1234", repository.addedVehicle?.plate)
         assertEquals("Civic", repository.addedVehicle?.model)
         assertEquals(2022, repository.addedVehicle?.year)
@@ -62,8 +62,8 @@ class AddVehicleViewModelTest {
         viewModel.saveVehicle(plate = "   ", model = "Civic", brand = "Honda", yearStr = "2022")
         advanceUntilIdle()
 
-        assertNull(repository.addedVehicle, "NÃ£o deve salvar se a placa for invÃ¡lida")
-        assertTrue(emittedEvents.isEmpty(), "NÃ£o deve fechar a tela se houve erro de validaÃ§Ã£o")
+        assertNull(repository.addedVehicle, "Não deve salvar se a placa for inválida")
+        assertTrue(emittedEvents.isEmpty(), "Não deve fechar a tela se houve erro de validação")
         job.cancel()
     }
 

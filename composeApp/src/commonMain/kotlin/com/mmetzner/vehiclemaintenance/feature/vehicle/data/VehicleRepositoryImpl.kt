@@ -1,5 +1,6 @@
-﻿package com.mmetzner.vehiclemaintenance.feature.vehicle.data
+package com.mmetzner.vehiclemaintenance.feature.vehicle.data
 
+import com.mmetzner.vehiclemaintenance.core.util.randomUuid
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.dao.VehicleDao
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.MaintenanceEntity
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.SyncStatus
@@ -8,19 +9,10 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.data.mapper.toEntity
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.mapper.toPendingEntity
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.mapper.toPhotoEntities
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.mapper.toRequestDto
-import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.dto.VehicleResponse
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.VehicleRemoteDataSource
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
-import com.mmetzner.vehiclemaintenance.core.util.randomUuid
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -29,7 +21,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class VehicleRepositoryImpl(
-    private val httpClient: HttpClient,
+    private val remoteDataSource: VehicleRemoteDataSource,
     private val vehicleDao: VehicleDao
 ) : VehicleRepository {
 
@@ -43,21 +35,15 @@ class VehicleRepositoryImpl(
 
     override suspend fun syncVehicle(plate: String): Result<Unit> {
         return try {
-            val response = httpClient.get("https://api.exemplo_fake.com/v1/vehicles/$plate")
+            val dto = remoteDataSource.getVehicleByPlate(plate)
 
-            if (response.status.isSuccess()) {
-                val dto: VehicleResponse = response.body()
+            val vehicleEntity = dto.toEntity()
+            val maintenanceEntities = dto.maintenances?.map { it.toEntity(dto.plate) } ?: emptyList()
+            val photoEntities = dto.maintenances?.flatMap { it.toPhotoEntities(it.id) } ?: emptyList()
 
-                val vehicleEntity = dto.toEntity()
-                val maintenanceEntities = dto.maintenances?.map { it.toEntity(dto.plate) } ?: emptyList()
-                val photoEntities = dto.maintenances?.flatMap { it.toPhotoEntities(it.id) } ?: emptyList()
+            vehicleDao.syncVehicleData(vehicleEntity, maintenanceEntities, photoEntities)
 
-                vehicleDao.syncVehicleData(vehicleEntity, maintenanceEntities, photoEntities)
-
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("Fail on API: Code ${response.status.value}"))
-            }
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -74,7 +60,7 @@ class VehicleRepositoryImpl(
 
     override suspend fun addMaintenance(vehiclePlate: String, maintenance: Maintenance) {
         val entity = MaintenanceEntity(
-            id = java.util.UUID.randomUUID().toString(),
+            id = randomUuid(),
             vehiclePlate = vehiclePlate,
             date = maintenance.date,
             description = maintenance.description,
@@ -92,33 +78,19 @@ class VehicleRepositoryImpl(
 
     override suspend fun syncPendingOutbox() {
         try {
-            // Sync Vehicles
             val pendingVehicles = vehicleDao.getVehiclesByStatus(SyncStatus.PENDING)
             for (entity in pendingVehicles) {
-                val response = httpClient.post("https://api.exemplo_fake.com/v1/vehicles") {
-                    contentType(ContentType.Application.Json)
-                    setBody(entity.toRequestDto())
-                }
-                if (response.status.isSuccess()) {
-                    vehicleDao.updateVehicleSyncStatus(entity.plate, SyncStatus.SYNCED)
-                }
+                remoteDataSource.createVehicle(entity.toRequestDto())
+                vehicleDao.updateVehicleSyncStatus(entity.plate, SyncStatus.SYNCED)
             }
 
-            // Sync Maintenances
             val pendingMaintenances = vehicleDao.getMaintenancesByStatus(SyncStatus.PENDING)
             for (entity in pendingMaintenances) {
-                val response = httpClient.post("https://api.exemplo_fake.com/v1/maintenances") {
-                    contentType(ContentType.Application.Json)
-                    setBody(entity.toRequestDto())
-                }
-                if (response.status.isSuccess()) {
-                    vehicleDao.updateMaintenanceSyncStatus(entity.id, SyncStatus.SYNCED)
-                }
+                remoteDataSource.createMaintenance(entity.toRequestDto())
+                vehicleDao.updateMaintenanceSyncStatus(entity.id, SyncStatus.SYNCED)
             }
         } catch (_: Exception) {
-            // Log error or handle retry logic
+            // Retry metadata belongs in a dedicated outbox model, which will be introduced later.
         }
     }
 }
-
-

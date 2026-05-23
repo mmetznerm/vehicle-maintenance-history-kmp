@@ -37,7 +37,7 @@ class VehicleSearchViewModel(
 
             if (syncResult.isFailure) {
                 if (_state.value !is VehicleSearchState.Success) {
-                    _state.value = VehicleSearchState.Error("VocÃª estÃ¡ offline e este veÃ­culo nÃ£o estÃ¡ no cache local.")
+                    _state.value = VehicleSearchState.Error("Você está offline e este veículo não está no cache local.")
                 }
             }
         }

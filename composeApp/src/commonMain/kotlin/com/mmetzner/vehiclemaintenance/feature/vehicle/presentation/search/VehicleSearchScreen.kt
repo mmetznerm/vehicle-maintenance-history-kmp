@@ -36,7 +36,7 @@ fun VehicleSearchScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Consultar VeÃ­culo") },
+                title = { Text("Consultar Veículo") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -50,7 +50,7 @@ fun VehicleSearchScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Cadastrar novo veÃ­culo"
+                    contentDescription = "Cadastrar novo veículo"
                 )
             }
         }
@@ -62,7 +62,7 @@ fun VehicleSearchScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Ãrea de Busca
+            // Área de busca.
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -70,7 +70,7 @@ fun VehicleSearchScreen(
             ) {
                 OutlinedTextField(
                     value = plateQuery,
-                    onValueChange = { plateQuery = it.uppercase() }, // ForÃ§a maiÃºsculas
+                    onValueChange = { plateQuery = it.uppercase() },
                     label = { Text("Digite a Placa") },
                     placeholder = { Text("ABC1D23") },
                     modifier = Modifier.weight(1f),
@@ -92,7 +92,7 @@ fun VehicleSearchScreen(
                         keyboardController?.hide()
                         viewModel.searchVehicle(plateQuery)
                     },
-                    modifier = Modifier.height(56.dp) // Alinha com a altura do TextField
+                    modifier = Modifier.height(56.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
@@ -107,7 +107,7 @@ fun VehicleSearchScreen(
             when (val currentState = state) {
                 is VehicleSearchState.Idle -> {
                     Text(
-                        text = "Digite uma placa para buscar o histÃ³rico de manutenÃ§Ã£o.",
+                        text = "Digite uma placa para buscar o histórico de manutenção.",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(32.dp)
@@ -146,8 +146,8 @@ fun VehicleSearchScreen(
 }
 
 /**
- * Componente privado para exibir os detalhes do veÃ­culo.
- * Isso mantÃ©m a Ã¡rvore principal limpa e legÃ­vel.
+ * Componente privado para exibir os detalhes do veículo.
+ * Isso mantém a árvore principal limpa e legível.
  */
 @Composable
 private fun VehicleResultCard(
@@ -183,7 +183,7 @@ private fun VehicleResultCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.CloudUpload,
-                            contentDescription = "SincronizaÃ§Ã£o pendente",
+                            contentDescription = "Sincronização pendente",
                             tint = MaterialTheme.colorScheme.secondary
                         )
                         Text(
@@ -211,7 +211,7 @@ private fun VehicleResultCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "HistÃ³rico de ManutenÃ§Ãµes",
+                text = "Histórico de Manutenções",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold
             )
@@ -225,7 +225,7 @@ private fun VehicleResultCard(
                 )
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    vehicle.maintenances?.forEach { maintenance ->
+                    vehicle.maintenances.forEach { maintenance ->
                         MaintenanceItem(maintenance)
                     }
                 }
@@ -239,7 +239,7 @@ private fun VehicleResultCard(
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Cadastrar ManutenÃ§Ã£o")
+                Text("Cadastrar Manutenção")
             }
         }
     }
@@ -285,7 +285,7 @@ private fun MaintenanceItem(maintenance: com.mmetzner.vehiclemaintenance.feature
                     style = MaterialTheme.typography.bodySmall
                 )
                 Text(
-                    text = maintenance.workshopName ?: "Oficina nÃ£o informada",
+                    text = maintenance.workshopName ?: "Oficina não informada",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

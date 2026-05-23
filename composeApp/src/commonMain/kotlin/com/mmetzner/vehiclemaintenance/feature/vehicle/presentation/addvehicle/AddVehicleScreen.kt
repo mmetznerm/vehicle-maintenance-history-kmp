@@ -31,7 +31,7 @@ fun AddVehicleScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Cadastrar VeÃ­culo") }
+                title = { Text("Cadastrar Veículo") }
             )
         }
     ) { paddingValues ->
@@ -81,7 +81,7 @@ fun AddVehicleScreen(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Text("Salvar VeÃ­culo")
+                Text("Salvar Veículo")
             }
         }
     }

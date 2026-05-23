@@ -32,7 +32,7 @@ class AddMaintenanceViewModel(
     private fun saveMaintenance() {
         val s = _state.value
         if (s.date.isBlank() || s.description.isBlank()) {
-            _state.update { it.copy(error = "Data e DescriÃ§Ã£o sÃ£o obrigatÃ³rios.") }
+            _state.update { it.copy(error = "Data e descrição são obrigatórios.") }
             return
         }
 

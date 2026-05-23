@@ -6,8 +6,8 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.Mainten
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.SyncStatus
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.VehicleEntity
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.VehicleWithMaintenances
-import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.dto.MaintenanceResponse
-import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.dto.VehicleResponse
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.MaintenanceResponse
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.VehicleResponse
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
 

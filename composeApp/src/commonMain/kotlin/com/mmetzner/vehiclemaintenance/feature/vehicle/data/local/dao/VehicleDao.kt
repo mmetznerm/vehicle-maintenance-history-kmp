@@ -24,8 +24,8 @@ interface VehicleDao {
     suspend fun insertPhotos(photos: List<MaintenancePhotoEntity>)
 
     /**
-     * SincronizaÃ§Ã£o AtÃ´mica: Se a inserÃ§Ã£o de fotos falhar, 
-     * nada Ã© salvo, mantendo o estado local Ã­ntegro.
+     * Sincronização atômica: se a inserção de fotos falhar,
+     * nada é salvo, mantendo o estado local íntegro.
      */
     @Transaction
     suspend fun syncVehicleData(

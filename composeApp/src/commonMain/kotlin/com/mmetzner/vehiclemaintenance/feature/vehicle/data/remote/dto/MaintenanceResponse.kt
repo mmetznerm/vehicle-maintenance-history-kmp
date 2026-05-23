@@ -1,4 +1,4 @@
-﻿package com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.dto
+package com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto
 
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import kotlinx.serialization.SerialName
@@ -19,10 +19,8 @@ fun MaintenanceResponse.toDomain() = Maintenance(
     id = this.id,
     date = this.date,
     description = this.description,
-    workshopName = this.workshopName ?: "NÃ£o informada",
+    workshopName = this.workshopName ?: "Nao informada",
     mileage = this.mileage,
     totalValue = this.totalValue,
     photoUrls = this.photoUrls ?: emptyList()
 )
-
-
