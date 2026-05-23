@@ -6,10 +6,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navOptions
 import androidx.navigation.toRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.AddVehicleRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.AddMaintenanceRoute
+import com.mmetzner.vehiclemaintenance.core.navigation.LoginRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.VehicleSearchRoute
+import com.mmetzner.vehiclemaintenance.feature.auth.presentation.login.LoginScreen
+import com.mmetzner.vehiclemaintenance.feature.auth.presentation.login.LoginViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addmaintenance.AddMaintenanceViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.search.VehicleSearchViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addvehicle.AddVehicleScreen
@@ -26,8 +30,26 @@ fun App() {
     MaterialTheme {
         NavHost(
             navController = navController,
-            startDestination = VehicleSearchRoute
+            startDestination = LoginRoute
         ) {
+            composable<LoginRoute> {
+                val viewModel = koinViewModel<LoginViewModel>()
+
+                LoginScreen(
+                    viewModel = viewModel,
+                    onAuthenticated = {
+                        navController.navigate(
+                            route = VehicleSearchRoute,
+                            navOptions = navOptions {
+                                popUpTo(LoginRoute) {
+                                    inclusive = true
+                                }
+                            }
+                        )
+                    }
+                )
+            }
+
             composable<VehicleSearchRoute> {
                 val viewModel = koinViewModel<VehicleSearchViewModel>()
 
