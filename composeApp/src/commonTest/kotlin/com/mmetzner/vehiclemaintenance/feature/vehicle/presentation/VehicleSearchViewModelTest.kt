@@ -37,7 +37,7 @@ class VehicleSearchViewModelTest {
     }
 
     @Test
-    fun `quando tem cache, deve mostrar Sucesso mesmo se a rede falhar`() = runTest {
+    fun `quando tem cache deve mostrar Sucesso mesmo se a rede falhar`() = runTest {
         val cachedVehicle = Vehicle("ABC1234", "Civic", "Honda", 2022, emptyList())
         repository.databaseFlow.value = cachedVehicle // Banco tem dado
         repository.networkResult = Result.failure(Exception("Sem internet"))
@@ -51,7 +51,7 @@ class VehicleSearchViewModelTest {
     }
 
     @Test
-    fun `quando NAO tem cache e a rede falha, deve mostrar Erro`() = runTest {
+    fun `quando NAO tem cache e a rede falha deve mostrar Erro`() = runTest {
         repository.databaseFlow.value = null
         repository.networkResult = Result.failure(Exception("Sem internet"))
 

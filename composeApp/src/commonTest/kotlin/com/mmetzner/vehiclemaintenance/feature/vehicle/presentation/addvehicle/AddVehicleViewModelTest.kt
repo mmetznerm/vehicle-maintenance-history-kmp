@@ -27,7 +27,7 @@ class AddVehicleViewModelTest {
     }
 
     @Test
-    fun `quando os dados sao validos, deve salvar no repositorio e emitir evento de voltar`() = runTest {
+    fun `quando os dados sao validos deve salvar no repositorio e emitir evento de voltar`() = runTest {
         val emittedEvents = mutableListOf<AddVehicleUiEvent>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiEvent.collect { event ->
@@ -53,7 +53,7 @@ class AddVehicleViewModelTest {
     }
 
     @Test
-    fun `quando a placa esta em branco, NAO deve salvar e NAO deve emitir evento`() = runTest {
+    fun `quando a placa esta em branco NAO deve salvar e NAO deve emitir evento`() = runTest {
         val emittedEvents = mutableListOf<AddVehicleUiEvent>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiEvent.collect { emittedEvents.add(it) }
@@ -68,7 +68,7 @@ class AddVehicleViewModelTest {
     }
 
     @Test
-    fun `quando o ano for invalido, NAO deve salvar e NAO deve emitir evento`() = runTest {
+    fun `quando o ano for invalido NAO deve salvar e NAO deve emitir evento`() = runTest {
         val emittedEvents = mutableListOf<AddVehicleUiEvent>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiEvent.collect { emittedEvents.add(it) }

@@ -12,6 +12,7 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.dto.Vehic
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
+import com.mmetzner.vehiclemaintenance.core.util.randomUuid
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
