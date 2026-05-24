@@ -1,6 +1,5 @@
 ﻿package com.mmetzner.vehiclemaintenance
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.tooling.preview.Preview
@@ -13,6 +12,7 @@ import com.mmetzner.vehiclemaintenance.core.navigation.AddVehicleRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.AddMaintenanceRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.LoginRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.VehicleSearchRoute
+import com.mmetzner.vehiclemaintenance.core.ui.theme.VehicleMaintenanceTheme
 import com.mmetzner.vehiclemaintenance.feature.auth.domain.repository.AuthRepository
 import com.mmetzner.vehiclemaintenance.feature.auth.presentation.login.LoginScreen
 import com.mmetzner.vehiclemaintenance.feature.auth.presentation.login.LoginViewModel
@@ -31,7 +31,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun App() {
     val navController = rememberNavController()
 
-    MaterialTheme {
+    VehicleMaintenanceTheme {
         NavHost(
             navController = navController,
             startDestination = LoginRoute
