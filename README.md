@@ -12,9 +12,16 @@ Currently implemented:
 
 - Kotlin Multiplatform targeting Android and iOS.
 - Shared UI with Compose Multiplatform.
+- Custom Material 3 visual theme.
+- Modern login, vehicle search, vehicle registration, and maintenance registration screens.
+- Android launcher icon.
 - Shared navigation.
 - Dependency injection with Koin.
 - Shared networking with Ktor Client.
+- Initial login/JWT integration.
+- Ktor Bearer token attachment for authenticated requests.
+- Platform token storage abstraction.
+- Android token storage backed by Android Keystore encryption.
 - Local persistence with Room Multiplatform.
 - Initial vehicle search flow.
 - Local vehicle registration.
@@ -25,9 +32,10 @@ Currently implemented:
 
 Not implemented yet:
 
-- Full login/JWT flow.
 - Real backend integration.
 - Image upload.
+- Refresh token flow.
+- iOS Keychain-backed token storage.
 - Robust outbox with retry/backoff.
 - Mobile observability.
 - Conflict resolution.
@@ -71,12 +79,18 @@ The current architecture uses pragmatic feature-based organization, with clear l
 ```text
 composeApp/src/commonMain/kotlin/com/mmetzner/vehiclemaintenance
 +-- core
+|   +-- auth
 |   +-- database
 |   +-- di
 |   +-- navigation
 |   +-- network
+|   +-- ui
 |   +-- util
 +-- feature
+    +-- auth
+    |   +-- data
+    |   +-- domain
+    |   +-- presentation
     +-- vehicle
         +-- data
         |   +-- local
@@ -111,6 +125,19 @@ Coordinates local persistence, remote calls, and mapping. The repository is the 
 `core`
 
 Contains shared infrastructure: database, dependency injection, navigation, networking, and multiplatform utilities.
+
+## UI Direction
+
+The app uses a clean Material 3 interface with a restrained teal, graphite, white, and amber palette. The current UI direction is inspired by modern transactional apps: compact forms, clear primary actions, strong hierarchy, and low visual noise.
+
+Current screens:
+
+- Login
+- Vehicle search
+- Vehicle registration
+- Maintenance registration
+
+The design intentionally avoids a marketing-style layout. The goal is to look like a real operational mobile app that a mechanic shop, fleet operator, or vehicle owner could use repeatedly.
 
 ## Offline-First Strategy
 
@@ -149,12 +176,22 @@ The base URL configuration uses `expect/actual`:
 
 Vehicle API calls go through `VehicleRemoteDataSource`, keeping endpoint details out of the repository.
 
+Authentication uses `AuthRemoteDataSource` for login and a shared `AuthRepository` for session checks and logout. Ktor's Bearer auth plugin attaches the stored access token to authenticated requests while skipping the login endpoint.
+
 Current structure:
 
 ```text
 core/network
 +-- ApiConfig.kt
 +-- createHttpClient.kt
+
+core/auth
++-- AuthTokens.kt
++-- AuthTokenStore.kt
+
+feature/auth/data/remote
++-- AuthRemoteDataSource.kt
++-- dto
 
 feature/vehicle/data/remote
 +-- VehicleRemoteDataSource.kt
@@ -179,6 +216,25 @@ Relationships:
 - A maintenance record has many photos.
 
 Entities already carry `syncStatus`, preparing the codebase for a more robust offline-first sync flow.
+
+## Authentication
+
+Authentication is implemented as a mobile foundation, but it still depends on the future Spring Boot backend to become end-to-end.
+
+Current behavior:
+
+- Login screen calls `/v1/auth/login`.
+- Access and refresh tokens are stored through a multiplatform `AuthTokenStore`.
+- Android persists tokens using Android Keystore-backed encryption.
+- iOS currently uses a simple persistent implementation and should move to Keychain before production use.
+- Logout clears stored tokens and returns the user to the login flow.
+
+Planned behavior:
+
+- Refresh access tokens when the backend contract is available.
+- Handle expired sessions centrally.
+- Add HTTP 401 handling with deterministic logout or token refresh.
+- Move iOS token storage to Keychain.
 
 ## Technical Decisions
 
@@ -271,9 +327,10 @@ Status: in progress.
 - Environment-based configuration.
 - Contracts aligned with OpenAPI.
 - Centralized HTTP error handling.
-- Login.
-- Secure token storage.
-- JWT interceptor in Ktor.
+- Refresh token flow.
+- Expired session handling.
+- iOS Keychain token storage.
+- Backend-driven auth validation.
 
 ### Phase 3: Professional Offline-First
 
@@ -316,10 +373,10 @@ Status: in progress.
 
 - Synchronization does not yet have persistent retry.
 - Sync failures are not yet richly exposed to the UI.
-- Token storage has not been implemented yet.
 - The networking layer does not yet support refresh tokens.
 - Image upload is currently only represented in the local data model.
 - The real backend is not connected yet.
+- iOS token storage still needs a Keychain implementation before production use.
 
 These limitations are intentional so the project remains incremental and reviewable.
 
