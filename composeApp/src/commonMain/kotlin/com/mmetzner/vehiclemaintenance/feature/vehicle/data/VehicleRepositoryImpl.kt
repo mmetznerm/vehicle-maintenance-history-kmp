@@ -1,5 +1,6 @@
 package com.mmetzner.vehiclemaintenance.feature.vehicle.data
 
+import com.mmetzner.vehiclemaintenance.core.network.AppEnvironment
 import com.mmetzner.vehiclemaintenance.core.util.randomUuid
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.dao.VehicleDao
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.MaintenanceEntity
@@ -22,12 +23,17 @@ import kotlinx.coroutines.launch
 
 class VehicleRepositoryImpl(
     private val remoteDataSource: VehicleRemoteDataSource,
-    private val vehicleDao: VehicleDao
+    private val vehicleDao: VehicleDao,
+    private val appEnvironment: AppEnvironment
 ) : VehicleRepository {
 
     private val syncScope = CoroutineScope(Dispatchers.IO)
 
     override suspend fun observePrimaryVehicle(): Flow<Vehicle?> {
+        if (appEnvironment.useMockData) {
+            syncVehicle(MockVehiclePlate)
+        }
+
         return vehicleDao.observePrimaryVehicle().map { relation ->
             relation?.toDomain()
         }
@@ -98,5 +104,9 @@ class VehicleRepositoryImpl(
         } catch (_: Exception) {
             // Retry metadata belongs in a dedicated outbox model, which will be introduced later.
         }
+    }
+
+    private companion object {
+        const val MockVehiclePlate = "ABC-1234"
     }
 }

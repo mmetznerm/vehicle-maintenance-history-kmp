@@ -1,0 +1,35 @@
+{
+  "plate": "ABC-1234",
+  "brand": "Tesla",
+  "model": "Model S Plaid",
+  "year": 2024,
+  "maintenances": [
+    {
+      "id": "mock-maintenance-001",
+      "date": "2026-05-12",
+      "description": "Synthetic oil and cabin filter service",
+      "workshopName": "AutoLog Partner Garage",
+      "mileage": 42000,
+      "totalValue": 185.50,
+      "photoUrls": []
+    },
+    {
+      "id": "mock-maintenance-002",
+      "date": "2026-02-18",
+      "description": "Brake inspection and tire rotation",
+      "workshopName": "Precision Fleet Service",
+      "mileage": 38500,
+      "totalValue": 240.00,
+      "photoUrls": []
+    },
+    {
+      "id": "mock-maintenance-003",
+      "date": "2025-11-03",
+      "description": "Battery health check and software inspection",
+      "workshopName": "EV Care Center",
+      "mileage": 35000,
+      "totalValue": 95.00,
+      "photoUrls": []
+    }
+  ]
+}
