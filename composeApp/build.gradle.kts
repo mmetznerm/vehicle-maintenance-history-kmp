@@ -49,7 +49,6 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
-            implementation(libs.ktor.client.mock)
             implementation(libs.koin.android)
         }
         commonMain.dependencies {
@@ -108,7 +107,6 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
-        buildConfigField("boolean", "IS_MOCK", "false")
         buildConfigField("String", "API_BASE_URL", apiBaseUrl.asBuildConfigString())
     }
     buildFeatures {
@@ -120,19 +118,8 @@ android {
         }
     }
     buildTypes {
-        getByName("debug") {
-            buildConfigField("boolean", "IS_MOCK", "false")
-        }
         getByName("release") {
             isMinifyEnabled = false
-            buildConfigField("boolean", "IS_MOCK", "false")
-        }
-        create("mock") {
-            initWith(getByName("debug"))
-            matchingFallbacks += listOf("debug")
-            applicationIdSuffix = ".mock"
-            versionNameSuffix = "-mock"
-            buildConfigField("boolean", "IS_MOCK", "true")
         }
     }
     compileOptions {
@@ -143,7 +130,6 @@ android {
 
 dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
-    add("kspMock", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
 
