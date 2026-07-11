@@ -71,9 +71,7 @@ fun AddVehicleScreen(
     var brand by remember { mutableStateOf("") }
     var model by remember { mutableStateOf("") }
     var year by remember { mutableStateOf("") }
-    var currentMileage by remember { mutableStateOf("0") }
     var color by remember { mutableStateOf("") }
-    var fuelType by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(viewModel.uiEvent) {
@@ -166,33 +164,11 @@ fun AddVehicleScreen(
                             )
                         }
 
-                        VehicleFormFieldGroup(label = "CURRENT MILEAGE") {
-                            VehicleFormTextField(
-                                value = currentMileage,
-                                onValueChange = { currentMileage = it.filter(Char::isDigit) },
-                                placeholder = "0",
-                                suffix = "KM",
-                                keyboardOptions = KeyboardOptions(
-                                    keyboardType = KeyboardType.Number,
-                                    imeAction = ImeAction.Next
-                                )
-                            )
-                        }
-
                         VehicleFormFieldGroup(label = "COLOR") {
                             VehicleFormTextField(
                                 value = color,
                                 onValueChange = { color = it },
                                 placeholder = "e.g. Midnight Silver"
-                            )
-                        }
-
-                        VehicleFormFieldGroup(label = "FUEL TYPE") {
-                            VehicleFormDropdown(
-                                value = fuelType,
-                                placeholder = "Select Fuel",
-                                options = listOf("Gasoline", "Flex", "Diesel", "Hybrid", "Electric"),
-                                onValueChange = { fuelType = it }
                             )
                         }
 
@@ -209,7 +185,7 @@ fun AddVehicleScreen(
                         Button(
                             onClick = {
                                 keyboardController?.hide()
-                                viewModel.saveVehicle(plate, model, brand, year)
+                                viewModel.saveVehicle(plate, model, brand, year, color)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
