@@ -20,6 +20,7 @@ import androidx.room.PrimaryKey
 )
 data class MaintenanceEntity(
     @PrimaryKey val id: String,
+    val remoteId: String? = null,
     val vehicleId: String? = null,
     val vehiclePlate: String,
     val date: String,

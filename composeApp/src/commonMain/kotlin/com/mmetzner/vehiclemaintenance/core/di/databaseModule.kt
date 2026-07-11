@@ -7,6 +7,7 @@ import org.koin.dsl.module
 val databaseModule = module {
     single<AppDatabase> { createRoomDatabase(get()) }
     single { get<AppDatabase>().vehicleDao() }
+    single { get<AppDatabase>().outboxDao() }
 }
 
 

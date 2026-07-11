@@ -1,8 +1,12 @@
 package com.mmetzner.vehiclemaintenance.feature.vehicle.data
 
 import com.mmetzner.vehiclemaintenance.core.util.randomUuid
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.dao.OutboxDao
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.dao.VehicleDao
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.MaintenanceEntity
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.OutboxAggregateType
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.OutboxOperationEntity
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.OutboxOperationType
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.SyncStatus
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.mapper.toDomain
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.mapper.toEntity
@@ -10,6 +14,8 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.data.mapper.toPendingEnti
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.mapper.toPhotoEntities
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.mapper.toRequestDto
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.VehicleRemoteDataSource
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.CreateMaintenanceRequest
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.CreateVehicleRequest
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
@@ -19,13 +25,21 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class VehicleRepositoryImpl(
     private val remoteDataSource: VehicleRemoteDataSource,
-    private val vehicleDao: VehicleDao
+    private val vehicleDao: VehicleDao,
+    private val outboxDao: OutboxDao
 ) : VehicleRepository {
 
     private val syncScope = CoroutineScope(Dispatchers.IO)
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
 
     override suspend fun observePrimaryVehicle(): Flow<Vehicle?> {
         return vehicleDao.observePrimaryVehicle().map { relation ->
@@ -59,6 +73,15 @@ class VehicleRepositoryImpl(
     override suspend fun addVehicle(vehicle: Vehicle) {
         val entity = vehicle.toPendingEntity()
         vehicleDao.insertVehicle(entity)
+        outboxDao.insert(
+            OutboxOperationEntity(
+                id = randomUuid(),
+                aggregateType = OutboxAggregateType.VEHICLE,
+                aggregateId = entity.plate,
+                operation = OutboxOperationType.CREATE,
+                payload = json.encodeToString(entity.toRequestDto())
+            )
+        )
 
         syncScope.launch {
             syncPendingOutbox()
@@ -77,6 +100,16 @@ class VehicleRepositoryImpl(
             syncStatus = SyncStatus.PENDING
         )
         vehicleDao.insertMaintenances(listOf(entity))
+        outboxDao.insert(
+            OutboxOperationEntity(
+                id = randomUuid(),
+                aggregateType = OutboxAggregateType.MAINTENANCE,
+                aggregateId = entity.id,
+                parentAggregateId = entity.vehiclePlate,
+                operation = OutboxOperationType.CREATE,
+                payload = json.encodeToString(entity.toRequestDto())
+            )
+        )
 
         syncScope.launch {
             syncPendingOutbox()
@@ -84,30 +117,55 @@ class VehicleRepositoryImpl(
     }
 
     override suspend fun syncPendingOutbox() {
-        try {
-            val pendingVehicles = vehicleDao.getVehiclesByStatus(SyncStatus.PENDING)
-            for (entity in pendingVehicles) {
-                val response = remoteDataSource.createVehicle(entity.toRequestDto())
-                vehicleDao.updateVehicleAfterSync(
-                    plate = entity.plate,
-                    id = response.id,
-                    color = response.color.orEmpty(),
-                    newStatus = SyncStatus.SYNCED
-                )
-            }
+        val operations = outboxDao.getPendingOperations()
 
-            val pendingMaintenances = vehicleDao.getMaintenancesByStatus(SyncStatus.PENDING)
-            for (entity in pendingMaintenances) {
-                val response = remoteDataSource.createMaintenanceByPlate(entity.vehiclePlate, entity.toRequestDto())
-                vehicleDao.updateMaintenanceAfterSync(
-                    id = entity.id,
-                    vehicleId = response.vehicleId,
-                    newStatus = SyncStatus.SYNCED
+        for (operation in operations) {
+            try {
+                outboxDao.markSyncing(operation.id)
+
+                when {
+                    operation.aggregateType == OutboxAggregateType.VEHICLE &&
+                        operation.operation == OutboxOperationType.CREATE -> syncCreateVehicle(operation)
+
+                    operation.aggregateType == OutboxAggregateType.MAINTENANCE &&
+                        operation.operation == OutboxOperationType.CREATE -> syncCreateMaintenance(operation)
+
+                    else -> error("Unsupported outbox operation ${operation.aggregateType}:${operation.operation}")
+                }
+
+                outboxDao.delete(operation.id)
+            } catch (e: Exception) {
+                outboxDao.markFailed(
+                    id = operation.id,
+                    error = e.message ?: "Could not sync operation."
                 )
             }
-        } catch (_: Exception) {
-            // Retry metadata belongs in a dedicated outbox model, which will be introduced later.
         }
     }
 
+    private suspend fun syncCreateVehicle(operation: OutboxOperationEntity) {
+        val request = json.decodeFromString<CreateVehicleRequest>(operation.payload)
+        val response = remoteDataSource.createVehicle(request)
+
+        vehicleDao.updateVehicleAfterSync(
+            plate = request.plate,
+            id = response.id,
+            color = response.color.orEmpty(),
+            newStatus = SyncStatus.SYNCED
+        )
+    }
+
+    private suspend fun syncCreateMaintenance(operation: OutboxOperationEntity) {
+        val vehiclePlate = operation.parentAggregateId
+            ?: error("Maintenance create operation is missing vehicle plate.")
+        val request = json.decodeFromString<CreateMaintenanceRequest>(operation.payload)
+        val response = remoteDataSource.createMaintenanceByPlate(vehiclePlate, request)
+
+        vehicleDao.updateMaintenanceAfterSync(
+            id = operation.aggregateId,
+            remoteId = response.id,
+            vehicleId = response.vehicleId,
+            newStatus = SyncStatus.SYNCED
+        )
+    }
 }

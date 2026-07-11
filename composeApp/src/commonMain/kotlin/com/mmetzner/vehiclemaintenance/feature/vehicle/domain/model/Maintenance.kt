@@ -9,7 +9,8 @@ data class Maintenance(
     val totalValue: Double?,
     val photoUrls: List<String>? = null,
     val isPendingSync: Boolean = false,
-    val vehicleId: String? = null
+    val vehicleId: String? = null,
+    val remoteId: String? = null
 )
 
 
