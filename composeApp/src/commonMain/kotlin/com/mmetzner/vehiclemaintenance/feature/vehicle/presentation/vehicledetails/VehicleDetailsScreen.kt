@@ -63,6 +63,7 @@ fun VehicleDetailsScreen(
     onBack: () -> Unit,
     onEditVehicle: (Vehicle) -> Unit,
     onAddMaintenance: (Vehicle) -> Unit,
+    onEditMaintenance: (Vehicle, Maintenance) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
@@ -108,7 +109,10 @@ fun VehicleDetailsScreen(
                         errorMessage = state.errorMessage,
                         onRetry = viewModel::refresh,
                         onEditVehicle = { onEditVehicle(state.vehicle!!) },
-                        onAddMaintenance = { onAddMaintenance(state.vehicle!!) }
+                        onAddMaintenance = { onAddMaintenance(state.vehicle!!) },
+                        onEditMaintenance = { maintenance ->
+                            onEditMaintenance(state.vehicle!!, maintenance)
+                        }
                     )
                 }
             }
@@ -175,7 +179,8 @@ private fun VehicleDetailsContent(
     errorMessage: String?,
     onRetry: () -> Unit,
     onEditVehicle: () -> Unit,
-    onAddMaintenance: () -> Unit
+    onAddMaintenance: () -> Unit,
+    onEditMaintenance: (Maintenance) -> Unit
 ) {
     val maintenances = vehicle.maintenances.orEmpty()
         .sortedByDescending { it.date }
@@ -236,7 +241,10 @@ private fun VehicleDetailsContent(
                 items = maintenances,
                 key = { maintenance -> maintenance.remoteId ?: maintenance.id }
             ) { maintenance ->
-                MaintenanceCard(maintenance)
+                MaintenanceCard(
+                    maintenance = maintenance,
+                    onEditMaintenance = { onEditMaintenance(maintenance) }
+                )
             }
         }
     }
@@ -385,7 +393,10 @@ private fun SummaryMetric(
 }
 
 @Composable
-private fun MaintenanceCard(maintenance: Maintenance) {
+private fun MaintenanceCard(
+    maintenance: Maintenance,
+    onEditMaintenance: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -425,6 +436,16 @@ private fun MaintenanceCard(maintenance: Maintenance) {
             ) {
                 MaintenanceMeta(Icons.Default.CalendarMonth, maintenance.date)
                 MaintenanceMeta(Icons.Default.Speed, "${maintenance.mileage ?: 0} km")
+            }
+
+            FilledTonalButton(
+                onClick = onEditMaintenance,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Icon(Icons.Default.Edit, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Editar manutencao")
             }
         }
     }

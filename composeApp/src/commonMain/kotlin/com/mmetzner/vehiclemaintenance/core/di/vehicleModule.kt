@@ -6,6 +6,7 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.Vehicle
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addmaintenance.AddMaintenanceViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addvehicle.AddVehicleViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.home.VehicleHomeViewModel
+import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.maintenanceedit.MaintenanceEditViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.search.VehicleSearchViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicledetails.VehicleDetailsViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicleedit.VehicleEditViewModel
@@ -23,4 +24,5 @@ val vehicleModule = module {
     viewModel { VehicleHomeViewModel(get()) }
     viewModel { AddVehicleViewModel(get()) }
     viewModel { AddMaintenanceViewModel(get()) }
+    viewModel { MaintenanceEditViewModel(get()) }
 }

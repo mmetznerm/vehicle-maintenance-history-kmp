@@ -26,5 +26,11 @@ object AddVehicleRoute
 @Serializable
 data class AddMaintenanceRoute(val plate: String)
 
+@Serializable
+data class MaintenanceEditRoute(
+    val vehicleId: String,
+    val maintenanceId: String
+)
+
 
 

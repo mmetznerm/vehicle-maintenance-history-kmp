@@ -11,6 +11,7 @@ import androidx.navigation.toRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.AddVehicleRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.AddMaintenanceRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.LoginRoute
+import com.mmetzner.vehiclemaintenance.core.navigation.MaintenanceEditRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.RegisterRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.VehicleDetailsRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.VehicleEditRoute
@@ -28,6 +29,8 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addvehicle.A
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addmaintenance.AddMaintenanceScreen
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.home.VehicleHomeScreen
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.home.VehicleHomeViewModel
+import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.maintenanceedit.MaintenanceEditScreen
+import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.maintenanceedit.MaintenanceEditViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicledetails.VehicleDetailsScreen
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicledetails.VehicleDetailsViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicleedit.VehicleEditScreen
@@ -141,6 +144,16 @@ fun App() {
                     },
                     onAddMaintenance = { vehicle ->
                         navController.navigate(AddMaintenanceRoute(vehicle.plate))
+                    },
+                    onEditMaintenance = { vehicle, maintenance ->
+                        vehicle.id?.let { vehicleId ->
+                            navController.navigate(
+                                MaintenanceEditRoute(
+                                    vehicleId = vehicleId,
+                                    maintenanceId = maintenance.remoteId ?: maintenance.id
+                                )
+                            )
+                        }
                     }
                 )
             }
@@ -220,6 +233,20 @@ fun App() {
                         navController.popBackStack()
                     },
                     onSuccess = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable<MaintenanceEditRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<MaintenanceEditRoute>()
+                val viewModel = koinViewModel<MaintenanceEditViewModel>()
+
+                MaintenanceEditScreen(
+                    viewModel = viewModel,
+                    vehicleId = route.vehicleId,
+                    maintenanceId = route.maintenanceId,
+                    onBack = {
                         navController.popBackStack()
                     }
                 )
