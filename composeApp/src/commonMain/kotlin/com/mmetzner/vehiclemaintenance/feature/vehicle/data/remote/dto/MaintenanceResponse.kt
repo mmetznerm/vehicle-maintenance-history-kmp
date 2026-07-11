@@ -7,20 +7,30 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MaintenanceResponse(
     @SerialName("id") val id: String,
-    @SerialName("date") val date: String,
+    @SerialName("vehicleId") val vehicleId: String,
+    @SerialName("maintenanceDate") val maintenanceDate: String,
+    @SerialName("odometer") val odometer: Int,
     @SerialName("description") val description: String,
-    @SerialName("workshopName") val workshopName: String?,
-    @SerialName("mileage") val mileage: Int?,
-    @SerialName("totalValue") val totalValue: Double?,
-    @SerialName("photoUrls") val photoUrls: List<String>? = null
+    @SerialName("cost") val cost: Double,
+    @SerialName("createdAt") val createdAt: String? = null,
+    @SerialName("updatedAt") val updatedAt: String? = null
+)
+
+@Serializable
+data class CreateMaintenanceRequest(
+    @SerialName("maintenanceDate") val maintenanceDate: String,
+    @SerialName("odometer") val odometer: Int,
+    @SerialName("description") val description: String,
+    @SerialName("cost") val cost: Double
 )
 
 fun MaintenanceResponse.toDomain() = Maintenance(
     id = this.id,
-    date = this.date,
+    vehicleId = this.vehicleId,
+    date = this.maintenanceDate,
     description = this.description,
-    workshopName = this.workshopName ?: "Nao informada",
-    mileage = this.mileage,
-    totalValue = this.totalValue,
-    photoUrls = this.photoUrls ?: emptyList()
+    workshopName = null,
+    mileage = this.odometer,
+    totalValue = this.cost,
+    photoUrls = emptyList()
 )

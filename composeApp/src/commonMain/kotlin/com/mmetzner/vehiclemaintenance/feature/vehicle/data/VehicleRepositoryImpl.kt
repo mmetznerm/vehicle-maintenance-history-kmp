@@ -42,10 +42,11 @@ class VehicleRepositoryImpl(
     override suspend fun syncVehicle(plate: String): Result<Unit> {
         return try {
             val dto = remoteDataSource.getVehicleByPlate(plate)
+            val maintenances = remoteDataSource.listMaintenances(dto.id)
 
             val vehicleEntity = dto.toEntity()
-            val maintenanceEntities = dto.maintenances?.map { it.toEntity(dto.plate) } ?: emptyList()
-            val photoEntities = dto.maintenances?.flatMap { it.toPhotoEntities(it.id) } ?: emptyList()
+            val maintenanceEntities = maintenances.map { it.toEntity(dto.plate) }
+            val photoEntities = maintenances.flatMap { it.toPhotoEntities(it.id) }
 
             vehicleDao.syncVehicleData(vehicleEntity, maintenanceEntities, photoEntities)
 
@@ -86,14 +87,23 @@ class VehicleRepositoryImpl(
         try {
             val pendingVehicles = vehicleDao.getVehiclesByStatus(SyncStatus.PENDING)
             for (entity in pendingVehicles) {
-                remoteDataSource.createVehicle(entity.toRequestDto())
-                vehicleDao.updateVehicleSyncStatus(entity.plate, SyncStatus.SYNCED)
+                val response = remoteDataSource.createVehicle(entity.toRequestDto())
+                vehicleDao.updateVehicleAfterSync(
+                    plate = entity.plate,
+                    id = response.id,
+                    color = response.color.orEmpty(),
+                    newStatus = SyncStatus.SYNCED
+                )
             }
 
             val pendingMaintenances = vehicleDao.getMaintenancesByStatus(SyncStatus.PENDING)
             for (entity in pendingMaintenances) {
-                remoteDataSource.createMaintenance(entity.toRequestDto())
-                vehicleDao.updateMaintenanceSyncStatus(entity.id, SyncStatus.SYNCED)
+                val response = remoteDataSource.createMaintenanceByPlate(entity.vehiclePlate, entity.toRequestDto())
+                vehicleDao.updateMaintenanceAfterSync(
+                    id = entity.id,
+                    vehicleId = response.vehicleId,
+                    newStatus = SyncStatus.SYNCED
+                )
             }
         } catch (_: Exception) {
             // Retry metadata belongs in a dedicated outbox model, which will be introduced later.

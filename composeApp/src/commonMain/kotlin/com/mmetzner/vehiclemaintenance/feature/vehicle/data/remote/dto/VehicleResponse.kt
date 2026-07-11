@@ -6,17 +6,51 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class VehicleResponse(
+    @SerialName("id") val id: String,
     @SerialName("plate") val plate: String,
-    @SerialName("model") val model: String,
     @SerialName("brand") val brand: String,
-    @SerialName("year") val year: Int,
-    @SerialName("maintenances") val maintenances: List<MaintenanceResponse>? = null
+    @SerialName("model") val model: String,
+    @SerialName("manufactureYear") val manufactureYear: Int,
+    @SerialName("color") val color: String? = null,
+    @SerialName("createdAt") val createdAt: String? = null,
+    @SerialName("updatedAt") val updatedAt: String? = null
+)
+
+@Serializable
+data class VehicleSummaryResponse(
+    @SerialName("id") val id: String,
+    @SerialName("plate") val plate: String,
+    @SerialName("brand") val brand: String,
+    @SerialName("model") val model: String,
+    @SerialName("manufactureYear") val manufactureYear: Int,
+    @SerialName("color") val color: String? = null
+)
+
+@Serializable
+data class CreateVehicleRequest(
+    @SerialName("plate") val plate: String,
+    @SerialName("brand") val brand: String,
+    @SerialName("model") val model: String,
+    @SerialName("manufactureYear") val manufactureYear: Int,
+    @SerialName("color") val color: String? = null
 )
 
 fun VehicleResponse.toDomain() = Vehicle(
+    id = this.id,
     plate = this.plate,
     model = this.model,
     brand = this.brand,
-    year = this.year,
-    maintenances = this.maintenances?.map { it.toDomain() } ?: emptyList()
+    year = this.manufactureYear,
+    color = this.color.orEmpty(),
+    maintenances = emptyList()
+)
+
+fun VehicleSummaryResponse.toDomain() = Vehicle(
+    id = this.id,
+    plate = this.plate,
+    model = this.model,
+    brand = this.brand,
+    year = this.manufactureYear,
+    color = this.color.orEmpty(),
+    maintenances = emptyList()
 )
