@@ -23,6 +23,8 @@ object OutboxAggregateType {
 
 object OutboxOperationType {
     const val CREATE = "CREATE"
+    const val UPDATE = "UPDATE"
+    const val DELETE = "DELETE"
 }
 
 object OutboxStatus {

@@ -122,6 +122,10 @@ class VehicleRepositoryImpl(
     override suspend fun addVehicle(vehicle: Vehicle) {
         val entity = vehicle.toPendingEntity()
         vehicleDao.insertVehicle(entity)
+        outboxDao.deleteForAggregate(
+            aggregateType = OutboxAggregateType.VEHICLE,
+            aggregateId = entity.plate
+        )
         outboxDao.insert(
             OutboxOperationEntity(
                 id = randomUuid(),
@@ -131,6 +135,75 @@ class VehicleRepositoryImpl(
                 payload = json.encodeToString(entity.toRequestDto())
             )
         )
+
+        syncScope.launch {
+            syncPendingOutbox()
+        }
+    }
+
+    override suspend fun updateVehicle(vehicle: Vehicle) {
+        val entity = vehicle.toPendingEntity()
+        vehicleDao.insertVehicle(entity)
+
+        val remoteVehicleId = vehicle.id
+        if (remoteVehicleId == null) {
+            outboxDao.deleteForAggregate(
+                aggregateType = OutboxAggregateType.VEHICLE,
+                aggregateId = entity.plate
+            )
+            outboxDao.insert(
+                OutboxOperationEntity(
+                    id = randomUuid(),
+                    aggregateType = OutboxAggregateType.VEHICLE,
+                    aggregateId = entity.plate,
+                    operation = OutboxOperationType.CREATE,
+                    payload = json.encodeToString(entity.toRequestDto())
+                )
+            )
+        } else {
+            vehicleDao.deleteOtherVehiclesWithId(remoteVehicleId, entity.plate)
+            outboxDao.deleteForAggregate(
+                aggregateType = OutboxAggregateType.VEHICLE,
+                aggregateId = remoteVehicleId
+            )
+            outboxDao.insert(
+                OutboxOperationEntity(
+                    id = randomUuid(),
+                    aggregateType = OutboxAggregateType.VEHICLE,
+                    aggregateId = remoteVehicleId,
+                    parentAggregateId = entity.plate,
+                    operation = OutboxOperationType.UPDATE,
+                    payload = json.encodeToString(vehicle.toRequestDto())
+                )
+            )
+        }
+
+        syncScope.launch {
+            syncPendingOutbox()
+        }
+    }
+
+    override suspend fun deleteVehicle(vehicle: Vehicle) {
+        vehicleDao.deleteVehicleByPlate(vehicle.plate)
+        outboxDao.deleteForAggregate(
+            aggregateType = OutboxAggregateType.VEHICLE,
+            aggregateId = vehicle.plate
+        )
+        outboxDao.deleteForParentAggregate(vehicle.plate)
+
+        val remoteVehicleId = vehicle.id
+        if (remoteVehicleId != null) {
+            outboxDao.insert(
+                OutboxOperationEntity(
+                    id = randomUuid(),
+                    aggregateType = OutboxAggregateType.VEHICLE,
+                    aggregateId = remoteVehicleId,
+                    parentAggregateId = vehicle.plate,
+                    operation = OutboxOperationType.DELETE,
+                    payload = ""
+                )
+            )
+        }
 
         syncScope.launch {
             syncPendingOutbox()
@@ -176,6 +249,12 @@ class VehicleRepositoryImpl(
                     operation.aggregateType == OutboxAggregateType.VEHICLE &&
                         operation.operation == OutboxOperationType.CREATE -> syncCreateVehicle(operation)
 
+                    operation.aggregateType == OutboxAggregateType.VEHICLE &&
+                        operation.operation == OutboxOperationType.UPDATE -> syncUpdateVehicle(operation)
+
+                    operation.aggregateType == OutboxAggregateType.VEHICLE &&
+                        operation.operation == OutboxOperationType.DELETE -> syncDeleteVehicle(operation)
+
                     operation.aggregateType == OutboxAggregateType.MAINTENANCE &&
                         operation.operation == OutboxOperationType.CREATE -> syncCreateMaintenance(operation)
 
@@ -202,6 +281,22 @@ class VehicleRepositoryImpl(
             color = response.color.orEmpty(),
             newStatus = SyncStatus.SYNCED
         )
+    }
+
+    private suspend fun syncUpdateVehicle(operation: OutboxOperationEntity) {
+        val request = json.decodeFromString<CreateVehicleRequest>(operation.payload)
+        val response = remoteDataSource.updateVehicle(operation.aggregateId, request)
+
+        vehicleDao.updateVehicleAfterSync(
+            plate = request.plate,
+            id = response.id,
+            color = response.color.orEmpty(),
+            newStatus = SyncStatus.SYNCED
+        )
+    }
+
+    private suspend fun syncDeleteVehicle(operation: OutboxOperationEntity) {
+        remoteDataSource.deleteVehicle(operation.aggregateId)
     }
 
     private suspend fun syncCreateMaintenance(operation: OutboxOperationEntity) {

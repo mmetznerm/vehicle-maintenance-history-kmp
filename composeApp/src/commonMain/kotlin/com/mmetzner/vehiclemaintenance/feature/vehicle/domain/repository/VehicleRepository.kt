@@ -13,6 +13,8 @@ interface VehicleRepository {
     suspend fun syncVehicle(plate: String): Result<Unit>
     suspend fun syncVehicleById(vehicleId: String): Result<Unit>
     suspend fun addVehicle(vehicle: Vehicle)
+    suspend fun updateVehicle(vehicle: Vehicle)
+    suspend fun deleteVehicle(vehicle: Vehicle)
     suspend fun addMaintenance(vehiclePlate: String, maintenance: Maintenance)
     suspend fun syncPendingOutbox()
 }

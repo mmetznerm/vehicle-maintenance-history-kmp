@@ -13,6 +13,7 @@ import com.mmetzner.vehiclemaintenance.core.navigation.AddMaintenanceRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.LoginRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.RegisterRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.VehicleDetailsRoute
+import com.mmetzner.vehiclemaintenance.core.navigation.VehicleEditRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.VehicleHomeRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.VehicleListRoute
 import com.mmetzner.vehiclemaintenance.core.ui.theme.VehicleMaintenanceTheme
@@ -29,6 +30,8 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.home.Vehicle
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.home.VehicleHomeViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicledetails.VehicleDetailsScreen
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicledetails.VehicleDetailsViewModel
+import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicleedit.VehicleEditScreen
+import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicleedit.VehicleEditViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehiclelist.VehicleListScreen
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehiclelist.VehicleListViewModel
 import kotlinx.coroutines.launch
@@ -131,8 +134,37 @@ fun App() {
                     onBack = {
                         navController.popBackStack()
                     },
+                    onEditVehicle = { vehicle ->
+                        vehicle.id?.let { vehicleId ->
+                            navController.navigate(VehicleEditRoute(vehicleId))
+                        }
+                    },
                     onAddMaintenance = { vehicle ->
                         navController.navigate(AddMaintenanceRoute(vehicle.plate))
+                    }
+                )
+            }
+
+            composable<VehicleEditRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<VehicleEditRoute>()
+                val viewModel = koinViewModel<VehicleEditViewModel>()
+
+                VehicleEditScreen(
+                    viewModel = viewModel,
+                    vehicleId = route.vehicleId,
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onDeleted = {
+                        navController.navigate(
+                            route = VehicleListRoute,
+                            navOptions = navOptions {
+                                popUpTo(VehicleListRoute) {
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                            }
+                        )
                     }
                 )
             }

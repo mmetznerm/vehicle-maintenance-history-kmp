@@ -59,6 +59,12 @@ interface VehicleDao {
     @Query("UPDATE vehicles SET id = :id, color = :color, syncStatus = :newStatus WHERE plate = :plate")
     suspend fun updateVehicleAfterSync(plate: String, id: String, color: String, newStatus: String)
 
+    @Query("DELETE FROM vehicles WHERE plate = :plate")
+    suspend fun deleteVehicleByPlate(plate: String)
+
+    @Query("DELETE FROM vehicles WHERE id = :vehicleId AND plate != :currentPlate")
+    suspend fun deleteOtherVehiclesWithId(vehicleId: String, currentPlate: String)
+
     @Query("SELECT * FROM maintenances WHERE syncStatus = :status")
     suspend fun getMaintenancesByStatus(status: String): List<MaintenanceEntity>
 

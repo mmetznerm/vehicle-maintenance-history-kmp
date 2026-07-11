@@ -13,6 +13,8 @@ class FakeOfflineFirstRepository : VehicleRepository {
     var syncCalled = false
     var syncVehiclesCalled = false
     var addedVehicle: Vehicle? = null
+    var updatedVehicle: Vehicle? = null
+    var deletedVehicle: Vehicle? = null
     var syncOutboxCalled = false
     var addedMaintenance: Maintenance? = null
 
@@ -49,6 +51,14 @@ class FakeOfflineFirstRepository : VehicleRepository {
 
     override suspend fun addVehicle(vehicle: Vehicle) {
         addedVehicle = vehicle
+    }
+
+    override suspend fun updateVehicle(vehicle: Vehicle) {
+        updatedVehicle = vehicle
+    }
+
+    override suspend fun deleteVehicle(vehicle: Vehicle) {
+        deletedVehicle = vehicle
     }
 
     override suspend fun addMaintenance(

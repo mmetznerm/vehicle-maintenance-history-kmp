@@ -18,12 +18,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Wrench
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -60,6 +61,7 @@ fun VehicleDetailsScreen(
     viewModel: VehicleDetailsViewModel,
     vehicleId: String,
     onBack: () -> Unit,
+    onEditVehicle: (Vehicle) -> Unit,
     onAddMaintenance: (Vehicle) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -105,6 +107,7 @@ fun VehicleDetailsScreen(
                         vehicle = state.vehicle!!,
                         errorMessage = state.errorMessage,
                         onRetry = viewModel::refresh,
+                        onEditVehicle = { onEditVehicle(state.vehicle!!) },
                         onAddMaintenance = { onAddMaintenance(state.vehicle!!) }
                     )
                 }
@@ -171,6 +174,7 @@ private fun VehicleDetailsContent(
     vehicle: Vehicle,
     errorMessage: String?,
     onRetry: () -> Unit,
+    onEditVehicle: () -> Unit,
     onAddMaintenance: () -> Unit
 ) {
     val maintenances = vehicle.maintenances.orEmpty()
@@ -189,6 +193,7 @@ private fun VehicleDetailsContent(
         item {
             VehicleSummaryCard(
                 vehicle = vehicle,
+                onEditVehicle = onEditVehicle,
                 onAddMaintenance = onAddMaintenance
             )
         }
@@ -240,6 +245,7 @@ private fun VehicleDetailsContent(
 @Composable
 private fun VehicleSummaryCard(
     vehicle: Vehicle,
+    onEditVehicle: () -> Unit,
     onAddMaintenance: () -> Unit
 ) {
     Card(
@@ -306,15 +312,30 @@ private fun VehicleSummaryCard(
                 )
             }
 
-            Button(
-                onClick = onAddMaintenance,
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = DetailsBlue)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Adicionar manutencao")
+                FilledTonalButton(
+                    onClick = onEditVehicle,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Editar")
+                }
+
+                Button(
+                    onClick = onAddMaintenance,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = DetailsBlue)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Manutencao")
+                }
             }
         }
     }
@@ -447,7 +468,7 @@ private fun EmptyMaintenanceCard(onAddMaintenance: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.Wrench,
+                imageVector = Icons.Default.Build,
                 contentDescription = null,
                 tint = DetailsBlue,
                 modifier = Modifier.size(32.dp)
