@@ -17,6 +17,10 @@ class FakeOfflineFirstRepository : VehicleRepository {
     var deletedVehicle: Vehicle? = null
     var syncOutboxCalled = false
     var addedMaintenance: Maintenance? = null
+    var updatedMaintenance: Maintenance? = null
+    var deletedMaintenance: Maintenance? = null
+    var updatedMaintenanceVehiclePlate: String? = null
+    var deletedMaintenanceVehiclePlate: String? = null
 
     override suspend fun observeVehicles(): Flow<List<Vehicle>> {
         return databaseListFlow
@@ -66,6 +70,24 @@ class FakeOfflineFirstRepository : VehicleRepository {
         maintenance: Maintenance
     ) {
         addedMaintenance = maintenance
+    }
+
+    override suspend fun updateMaintenance(
+        vehiclePlate: String,
+        fallbackVehicleId: String?,
+        maintenance: Maintenance
+    ) {
+        updatedMaintenanceVehiclePlate = vehiclePlate
+        updatedMaintenance = maintenance
+    }
+
+    override suspend fun deleteMaintenance(
+        vehiclePlate: String,
+        fallbackVehicleId: String?,
+        maintenance: Maintenance
+    ) {
+        deletedMaintenanceVehiclePlate = vehiclePlate
+        deletedMaintenance = maintenance
     }
 
     override suspend fun syncPendingOutbox() {

@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 class VehicleRepositoryImpl(
@@ -238,6 +239,94 @@ class VehicleRepositoryImpl(
         }
     }
 
+    override suspend fun updateMaintenance(
+        vehiclePlate: String,
+        fallbackVehicleId: String?,
+        maintenance: Maintenance
+    ) {
+        val entity = maintenance.toPendingEntity(vehiclePlate, fallbackVehicleId)
+        vehicleDao.insertMaintenances(listOf(entity))
+
+        val remoteMaintenanceId = maintenance.remoteId
+        val remoteVehicleId = maintenance.vehicleId ?: fallbackVehicleId
+        if (remoteMaintenanceId == null || remoteVehicleId == null) {
+            outboxDao.deleteForAggregate(
+                aggregateType = OutboxAggregateType.MAINTENANCE,
+                aggregateId = entity.id
+            )
+            outboxDao.insert(
+                OutboxOperationEntity(
+                    id = randomUuid(),
+                    aggregateType = OutboxAggregateType.MAINTENANCE,
+                    aggregateId = entity.id,
+                    parentAggregateId = entity.vehiclePlate,
+                    operation = OutboxOperationType.CREATE,
+                    payload = json.encodeToString(entity.toRequestDto())
+                )
+            )
+        } else {
+            outboxDao.deleteForAggregate(
+                aggregateType = OutboxAggregateType.MAINTENANCE,
+                aggregateId = remoteMaintenanceId
+            )
+            outboxDao.insert(
+                OutboxOperationEntity(
+                    id = randomUuid(),
+                    aggregateType = OutboxAggregateType.MAINTENANCE,
+                    aggregateId = remoteMaintenanceId,
+                    parentAggregateId = remoteVehicleId,
+                    operation = OutboxOperationType.UPDATE,
+                    payload = json.encodeToString(
+                        MaintenanceUpdatePayload(
+                            localId = entity.id,
+                            vehicleId = remoteVehicleId,
+                            request = maintenance.toRequestDto()
+                        )
+                    )
+                )
+            )
+        }
+
+        syncScope.launch {
+            syncPendingOutbox()
+        }
+    }
+
+    override suspend fun deleteMaintenance(
+        vehiclePlate: String,
+        fallbackVehicleId: String?,
+        maintenance: Maintenance
+    ) {
+        vehicleDao.deleteMaintenanceById(maintenance.id)
+        outboxDao.deleteForAggregate(
+            aggregateType = OutboxAggregateType.MAINTENANCE,
+            aggregateId = maintenance.id
+        )
+
+        val remoteMaintenanceId = maintenance.remoteId
+        val remoteVehicleId = maintenance.vehicleId ?: fallbackVehicleId
+        if (remoteMaintenanceId != null && remoteVehicleId != null) {
+            outboxDao.deleteForAggregate(
+                aggregateType = OutboxAggregateType.MAINTENANCE,
+                aggregateId = remoteMaintenanceId
+            )
+            outboxDao.insert(
+                OutboxOperationEntity(
+                    id = randomUuid(),
+                    aggregateType = OutboxAggregateType.MAINTENANCE,
+                    aggregateId = remoteMaintenanceId,
+                    parentAggregateId = remoteVehicleId,
+                    operation = OutboxOperationType.DELETE,
+                    payload = ""
+                )
+            )
+        }
+
+        syncScope.launch {
+            syncPendingOutbox()
+        }
+    }
+
     override suspend fun syncPendingOutbox() {
         val operations = outboxDao.getPendingOperations()
 
@@ -257,6 +346,12 @@ class VehicleRepositoryImpl(
 
                     operation.aggregateType == OutboxAggregateType.MAINTENANCE &&
                         operation.operation == OutboxOperationType.CREATE -> syncCreateMaintenance(operation)
+
+                    operation.aggregateType == OutboxAggregateType.MAINTENANCE &&
+                        operation.operation == OutboxOperationType.UPDATE -> syncUpdateMaintenance(operation)
+
+                    operation.aggregateType == OutboxAggregateType.MAINTENANCE &&
+                        operation.operation == OutboxOperationType.DELETE -> syncDeleteMaintenance(operation)
 
                     else -> error("Unsupported outbox operation ${operation.aggregateType}:${operation.operation}")
                 }
@@ -312,4 +407,37 @@ class VehicleRepositoryImpl(
             newStatus = SyncStatus.SYNCED
         )
     }
+
+    private suspend fun syncUpdateMaintenance(operation: OutboxOperationEntity) {
+        val payload = json.decodeFromString<MaintenanceUpdatePayload>(operation.payload)
+        val response = remoteDataSource.updateMaintenance(
+            vehicleId = payload.vehicleId,
+            maintenanceId = operation.aggregateId,
+            maintenance = payload.request
+        )
+
+        vehicleDao.updateMaintenanceAfterSync(
+            id = payload.localId,
+            remoteId = response.id,
+            vehicleId = response.vehicleId,
+            newStatus = SyncStatus.SYNCED
+        )
+    }
+
+    private suspend fun syncDeleteMaintenance(operation: OutboxOperationEntity) {
+        val vehicleId = operation.parentAggregateId
+            ?: error("Maintenance delete operation is missing vehicle id.")
+
+        remoteDataSource.deleteMaintenance(
+            vehicleId = vehicleId,
+            maintenanceId = operation.aggregateId
+        )
+    }
 }
+
+@Serializable
+private data class MaintenanceUpdatePayload(
+    val localId: String,
+    val vehicleId: String,
+    val request: CreateMaintenanceRequest
+)

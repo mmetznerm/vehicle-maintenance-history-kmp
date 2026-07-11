@@ -16,6 +16,8 @@ interface VehicleRepository {
     suspend fun updateVehicle(vehicle: Vehicle)
     suspend fun deleteVehicle(vehicle: Vehicle)
     suspend fun addMaintenance(vehiclePlate: String, maintenance: Maintenance)
+    suspend fun updateMaintenance(vehiclePlate: String, fallbackVehicleId: String?, maintenance: Maintenance)
+    suspend fun deleteMaintenance(vehiclePlate: String, fallbackVehicleId: String?, maintenance: Maintenance)
     suspend fun syncPendingOutbox()
 }
 

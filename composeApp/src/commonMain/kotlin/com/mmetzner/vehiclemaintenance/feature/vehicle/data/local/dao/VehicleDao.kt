@@ -71,6 +71,9 @@ interface VehicleDao {
     @Query("UPDATE maintenances SET syncStatus = :newStatus WHERE id = :id")
     suspend fun updateMaintenanceSyncStatus(id: String, newStatus: String)
 
+    @Query("DELETE FROM maintenances WHERE id = :id")
+    suspend fun deleteMaintenanceById(id: String)
+
     @Query(
         """
         UPDATE maintenances

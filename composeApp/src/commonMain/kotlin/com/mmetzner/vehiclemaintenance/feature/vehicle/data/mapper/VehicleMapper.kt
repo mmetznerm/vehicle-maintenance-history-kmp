@@ -72,6 +72,19 @@ fun MaintenanceWithPhotos.toDomain() = Maintenance(
     remoteId = this.maintenance.remoteId
 )
 
+fun Maintenance.toPendingEntity(vehiclePlate: String, fallbackVehicleId: String?) = MaintenanceEntity(
+    id = this.id,
+    remoteId = this.remoteId,
+    vehicleId = this.vehicleId ?: fallbackVehicleId,
+    vehiclePlate = vehiclePlate,
+    date = this.date,
+    description = this.description,
+    workshopName = this.workshopName,
+    mileage = this.mileage,
+    totalValue = this.totalValue,
+    syncStatus = SyncStatus.PENDING
+)
+
 fun Vehicle.toPendingEntity() = VehicleEntity(
     plate = this.plate,
     id = this.id,
@@ -99,6 +112,13 @@ fun Vehicle.toRequestDto() = CreateVehicleRequest(
 )
 
 fun MaintenanceEntity.toRequestDto() = CreateMaintenanceRequest(
+    maintenanceDate = this.date,
+    odometer = this.mileage ?: 0,
+    description = this.description,
+    cost = this.totalValue ?: 0.0
+)
+
+fun Maintenance.toRequestDto() = CreateMaintenanceRequest(
     maintenanceDate = this.date,
     odometer = this.mileage ?: 0,
     description = this.description,
