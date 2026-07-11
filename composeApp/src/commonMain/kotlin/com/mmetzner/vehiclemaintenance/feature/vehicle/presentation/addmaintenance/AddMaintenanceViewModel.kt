@@ -19,13 +19,9 @@ class AddMaintenanceViewModel(
 
     fun onEvent(event: AddMaintenanceEvent) {
         when (event) {
-            is AddMaintenanceEvent.UpdateServiceType -> _state.update { it.copy(serviceType = event.value, description = event.value) }
             is AddMaintenanceEvent.UpdateDate -> _state.update { it.copy(date = event.value) }
             is AddMaintenanceEvent.UpdateMileage -> _state.update { it.copy(mileage = event.value) }
             is AddMaintenanceEvent.UpdateDescription -> _state.update { it.copy(description = event.value) }
-            is AddMaintenanceEvent.UpdateReplacedParts -> _state.update { it.copy(replacedParts = event.value) }
-            is AddMaintenanceEvent.UpdateNotes -> _state.update { it.copy(notes = event.value) }
-            is AddMaintenanceEvent.UpdateWorkshop -> _state.update { it.copy(workshopName = event.value) }
             is AddMaintenanceEvent.UpdateValue -> _state.update { it.copy(totalValue = event.value) }
             is AddMaintenanceEvent.SetPlate -> _state.update { it.copy(vehiclePlate = event.plate) }
             is AddMaintenanceEvent.Save -> saveMaintenance()
@@ -34,8 +30,9 @@ class AddMaintenanceViewModel(
 
     private fun saveMaintenance() {
         val s = _state.value
-        if (s.date.isBlank() || s.serviceType.isBlank()) {
-            _state.update { it.copy(error = "Service type and date are required.") }
+        val validationError = validateMaintenance(s)
+        if (validationError != null) {
+            _state.update { it.copy(error = validationError) }
             return
         }
 
@@ -46,9 +43,9 @@ class AddMaintenanceViewModel(
                     vehiclePlate = s.vehiclePlate,
                     maintenance = Maintenance(
                         id = "", // Repository will generate UUID
-                        date = s.date,
-                        description = s.toMaintenanceDescription(),
-                        workshopName = s.workshopName,
+                        date = s.date.trim(),
+                        description = s.description.trim(),
+                        workshopName = null,
                         mileage = s.mileage.toIntOrNull(),
                         totalValue = s.totalValue.toCurrencyDoubleOrNull(),
                         isPendingSync = true
@@ -62,28 +59,28 @@ class AddMaintenanceViewModel(
     }
 }
 
+private fun validateMaintenance(state: AddMaintenanceState): String? {
+    val mileage = state.mileage.toIntOrNull()
+    val totalValue = state.totalValue.toCurrencyDoubleOrNull()
+
+    return when {
+        state.date.isBlank() -> "Informe a data da manutencao."
+        state.mileage.isBlank() -> "Informe o odometro."
+        mileage == null || mileage < 0 -> "Informe um odometro valido."
+        state.totalValue.isBlank() -> "Informe o custo total."
+        totalValue == null || totalValue < 0.0 -> "Informe um custo valido."
+        state.description.isBlank() -> "Informe a descricao do servico."
+        state.description.trim().length > 500 -> "Use no maximo 500 caracteres."
+        else -> null
+    }
+}
+
 private fun String.toCurrencyDoubleOrNull(): Double? {
     return filter { char ->
         char.isDigit() || char == '.' || char == ','
     }
         .replace(',', '.')
         .toDoubleOrNull()
-}
-
-private fun AddMaintenanceState.toMaintenanceDescription(): String {
-    return buildString {
-        append(serviceType.ifBlank { description })
-
-        if (replacedParts.isNotBlank()) {
-            append(" | Parts: ")
-            append(replacedParts.trim())
-        }
-
-        if (notes.isNotBlank()) {
-            append(" | Notes: ")
-            append(notes.trim())
-        }
-    }
 }
 
 

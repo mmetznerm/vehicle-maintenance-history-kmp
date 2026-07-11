@@ -51,6 +51,7 @@ class MaintenanceEditViewModel(
                     if (shouldInitialize) {
                         formInitialized = true
                     }
+                    val initialMaintenance = maintenance.takeIf { shouldInitialize }
 
                     _state.update { current ->
                         current.copy(
@@ -58,11 +59,10 @@ class MaintenanceEditViewModel(
                             maintenance = maintenance,
                             isLoading = false,
                             errorMessage = null,
-                            serviceType = if (shouldInitialize) maintenance?.description.orEmpty() else current.serviceType,
-                            date = if (shouldInitialize) maintenance?.date.orEmpty() else current.date,
-                            mileage = if (shouldInitialize) maintenance?.mileage?.toString().orEmpty() else current.mileage,
-                            totalValue = if (shouldInitialize) maintenance?.totalValue?.toString().orEmpty() else current.totalValue,
-                            workshopName = if (shouldInitialize) maintenance?.workshopName.orEmpty() else current.workshopName
+                            description = initialMaintenance?.description ?: current.description,
+                            date = initialMaintenance?.date ?: current.date,
+                            mileage = initialMaintenance?.mileage?.toString() ?: current.mileage,
+                            totalValue = initialMaintenance?.totalValue?.toString() ?: current.totalValue
                         )
                     }
                 }
@@ -91,8 +91,8 @@ class MaintenanceEditViewModel(
         }
     }
 
-    fun onServiceTypeChanged(value: String) {
-        _state.update { it.copy(serviceType = value) }
+    fun onDescriptionChanged(value: String) {
+        _state.update { it.copy(description = value) }
     }
 
     fun onDateChanged(value: String) {
@@ -107,10 +107,6 @@ class MaintenanceEditViewModel(
         _state.update { it.copy(totalValue = value) }
     }
 
-    fun onWorkshopChanged(value: String) {
-        _state.update { it.copy(workshopName = value) }
-    }
-
     fun save() {
         val current = state.value
         val vehicle = current.vehicle
@@ -121,8 +117,9 @@ class MaintenanceEditViewModel(
             return
         }
 
-        if (current.serviceType.isBlank() || current.date.isBlank()) {
-            _state.update { it.copy(errorMessage = "Tipo de servico e data sao obrigatorios.") }
+        val validationError = validateMaintenance(current)
+        if (validationError != null) {
+            _state.update { it.copy(errorMessage = validationError) }
             return
         }
 
@@ -135,8 +132,8 @@ class MaintenanceEditViewModel(
                     fallbackVehicleId = vehicle.id,
                     maintenance = maintenance.copy(
                         date = current.date.trim(),
-                        description = current.serviceType.trim(),
-                        workshopName = current.workshopName.trim().ifBlank { null },
+                        description = current.description.trim(),
+                        workshopName = null,
                         mileage = current.mileage.toIntOrNull(),
                         totalValue = current.totalValue.toCurrencyDoubleOrNull(),
                         isPendingSync = true
@@ -196,11 +193,10 @@ data class MaintenanceEditState(
     val isSaving: Boolean = false,
     val isDeleting: Boolean = false,
     val errorMessage: String? = null,
-    val serviceType: String = "",
+    val description: String = "",
     val date: String = "",
     val mileage: String = "",
-    val totalValue: String = "",
-    val workshopName: String = ""
+    val totalValue: String = ""
 )
 
 sealed interface MaintenanceEditUiEvent {
@@ -213,4 +209,20 @@ private fun String.toCurrencyDoubleOrNull(): Double? {
     }
         .replace(',', '.')
         .toDoubleOrNull()
+}
+
+private fun validateMaintenance(state: MaintenanceEditState): String? {
+    val mileage = state.mileage.toIntOrNull()
+    val totalValue = state.totalValue.toCurrencyDoubleOrNull()
+
+    return when {
+        state.date.isBlank() -> "Informe a data da manutencao."
+        state.mileage.isBlank() -> "Informe o odometro."
+        mileage == null || mileage < 0 -> "Informe um odometro valido."
+        state.totalValue.isBlank() -> "Informe o custo total."
+        totalValue == null || totalValue < 0.0 -> "Informe um custo valido."
+        state.description.isBlank() -> "Informe a descricao do servico."
+        state.description.trim().length > 500 -> "Use no maximo 500 caracteres."
+        else -> null
+    }
 }

@@ -43,7 +43,7 @@ class MaintenanceEditViewModelTest {
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.isLoading)
-        assertEquals("Troca de oleo", viewModel.state.value.serviceType)
+        assertEquals("Troca de oleo", viewModel.state.value.description)
         assertEquals("2026-07-10", viewModel.state.value.date)
         assertEquals("45000", viewModel.state.value.mileage)
         assertEquals("250.0", viewModel.state.value.totalValue)
@@ -58,7 +58,7 @@ class MaintenanceEditViewModelTest {
         viewModel.load("vehicle-id", "maintenance-remote-id")
         advanceUntilIdle()
 
-        viewModel.onServiceTypeChanged("Revisao")
+        viewModel.onDescriptionChanged("Revisao")
         viewModel.onDateChanged("2026-07-11")
         viewModel.onMileageChanged("46000")
         viewModel.onTotalValueChanged("300,50")
@@ -73,6 +73,7 @@ class MaintenanceEditViewModelTest {
         assertEquals("2026-07-11", updatedMaintenance?.date)
         assertEquals(46000, updatedMaintenance?.mileage)
         assertEquals(300.50, updatedMaintenance?.totalValue)
+        assertEquals(null, updatedMaintenance?.workshopName)
         assertEquals(true, updatedMaintenance?.isPendingSync)
     }
 

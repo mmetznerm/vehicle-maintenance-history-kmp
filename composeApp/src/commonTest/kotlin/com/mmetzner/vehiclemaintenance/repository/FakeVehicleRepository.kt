@@ -17,6 +17,7 @@ class FakeOfflineFirstRepository : VehicleRepository {
     var deletedVehicle: Vehicle? = null
     var syncOutboxCalled = false
     var addedMaintenance: Maintenance? = null
+    var addedMaintenanceVehiclePlate: String? = null
     var updatedMaintenance: Maintenance? = null
     var deletedMaintenance: Maintenance? = null
     var updatedMaintenanceVehiclePlate: String? = null
@@ -69,6 +70,7 @@ class FakeOfflineFirstRepository : VehicleRepository {
         vehiclePlate: String,
         maintenance: Maintenance
     ) {
+        addedMaintenanceVehiclePlate = vehiclePlate
         addedMaintenance = maintenance
     }
 
