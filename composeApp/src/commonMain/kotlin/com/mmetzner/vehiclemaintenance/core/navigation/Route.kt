@@ -12,6 +12,9 @@ object RegisterRoute
 object VehicleHomeRoute
 
 @Serializable
+object VehicleListRoute
+
+@Serializable
 object AddVehicleRoute
 
 @Serializable

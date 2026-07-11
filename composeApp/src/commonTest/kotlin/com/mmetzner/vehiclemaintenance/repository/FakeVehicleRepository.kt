@@ -8,12 +8,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeOfflineFirstRepository : VehicleRepository {
     val databaseFlow = MutableStateFlow<Vehicle?>(null)
+    val databaseListFlow = MutableStateFlow<List<Vehicle>>(emptyList())
     var networkResult: Result<Unit> = Result.success(Unit)
     var syncCalled = false
+    var syncVehiclesCalled = false
     var addedVehicle: Vehicle? = null
     var syncOutboxCalled = false
     var addedMaintenance: Maintenance? = null
 
+    override suspend fun observeVehicles(): Flow<List<Vehicle>> {
+        return databaseListFlow
+    }
 
     override suspend fun observeVehicle(plate: String): Flow<Vehicle?> {
         return databaseFlow
@@ -25,6 +30,11 @@ class FakeOfflineFirstRepository : VehicleRepository {
 
     override suspend fun syncVehicle(plate: String): Result<Unit> {
         syncCalled = true
+        return networkResult
+    }
+
+    override suspend fun syncVehicles(): Result<Unit> {
+        syncVehiclesCalled = true
         return networkResult
     }
 

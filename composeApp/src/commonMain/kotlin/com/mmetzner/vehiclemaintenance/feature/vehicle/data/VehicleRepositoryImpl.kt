@@ -41,6 +41,12 @@ class VehicleRepositoryImpl(
         encodeDefaults = true
     }
 
+    override suspend fun observeVehicles(): Flow<List<Vehicle>> {
+        return vehicleDao.observeVehicles().map { relations ->
+            relations.map { it.toDomain() }
+        }
+    }
+
     override suspend fun observePrimaryVehicle(): Flow<Vehicle?> {
         return vehicleDao.observePrimaryVehicle().map { relation ->
             relation?.toDomain()
@@ -50,6 +56,26 @@ class VehicleRepositoryImpl(
     override suspend fun observeVehicle(plate: String): Flow<Vehicle?> {
         return vehicleDao.observeVehicleByPlate(plate).map { relation ->
             relation?.toDomain()
+        }
+    }
+
+    override suspend fun syncVehicles(): Result<Unit> {
+        return try {
+            val vehicles = remoteDataSource.listVehicles()
+
+            for (vehicle in vehicles) {
+                val maintenances = remoteDataSource.listMaintenances(vehicle.id)
+
+                vehicleDao.syncVehicleData(
+                    vehicle = vehicle.toEntity(),
+                    maintenances = maintenances.map { it.toEntity(vehicle.plate) },
+                    photos = maintenances.flatMap { it.toPhotoEntities(it.id) }
+                )
+            }
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 

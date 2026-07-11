@@ -10,10 +10,20 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.CreateMai
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.CreateVehicleRequest
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.MaintenanceResponse
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.VehicleResponse
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.VehicleSummaryResponse
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
 
 fun VehicleResponse.toEntity() = VehicleEntity(
+    plate = this.plate,
+    id = this.id,
+    model = this.model,
+    brand = this.brand,
+    year = this.manufactureYear,
+    color = this.color.orEmpty()
+)
+
+fun VehicleSummaryResponse.toEntity() = VehicleEntity(
     plate = this.plate,
     id = this.id,
     model = this.model,
