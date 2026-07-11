@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Store
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -161,11 +160,10 @@ fun MaintenanceEditScreen(
                     else -> {
                         MaintenanceEditForm(
                             state = state,
-                            onServiceTypeChanged = viewModel::onServiceTypeChanged,
+                            onDescriptionChanged = viewModel::onDescriptionChanged,
                             onDateChanged = viewModel::onDateChanged,
                             onMileageChanged = viewModel::onMileageChanged,
                             onTotalValueChanged = viewModel::onTotalValueChanged,
-                            onWorkshopChanged = viewModel::onWorkshopChanged,
                             onSave = {
                                 keyboardController?.hide()
                                 viewModel.save()
@@ -209,11 +207,10 @@ private fun MaintenanceEditTopBar(onBack: () -> Unit) {
 @Composable
 private fun MaintenanceEditForm(
     state: MaintenanceEditState,
-    onServiceTypeChanged: (String) -> Unit,
+    onDescriptionChanged: (String) -> Unit,
     onDateChanged: (String) -> Unit,
     onMileageChanged: (String) -> Unit,
     onTotalValueChanged: (String) -> Unit,
-    onWorkshopChanged: (String) -> Unit,
     onSave: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -221,15 +218,7 @@ private fun MaintenanceEditForm(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        MaintenanceEditFieldGroup(label = "TIPO / DESCRICAO") {
-            MaintenanceEditTextField(
-                value = state.serviceType,
-                onValueChange = onServiceTypeChanged,
-                placeholder = "Troca de oleo"
-            )
-        }
-
-        MaintenanceEditFieldGroup(label = "DATA") {
+        MaintenanceEditFieldGroup(label = "DATA DA MANUTENCAO") {
             MaintenanceEditTextField(
                 value = state.date,
                 onValueChange = onDateChanged,
@@ -255,11 +244,11 @@ private fun MaintenanceEditForm(
             )
         }
 
-        MaintenanceEditFieldGroup(label = "CUSTO") {
+        MaintenanceEditFieldGroup(label = "CUSTO TOTAL") {
             MaintenanceEditTextField(
                 value = state.totalValue,
                 onValueChange = onTotalValueChanged,
-                placeholder = "250.00",
+                placeholder = "250,00",
                 leadingIcon = {
                     Icon(Icons.Default.Payments, contentDescription = null)
                 },
@@ -270,14 +259,13 @@ private fun MaintenanceEditForm(
             )
         }
 
-        MaintenanceEditFieldGroup(label = "OFICINA") {
+        MaintenanceEditFieldGroup(label = "DESCRICAO DO SERVICO") {
             MaintenanceEditTextField(
-                value = state.workshopName,
-                onValueChange = onWorkshopChanged,
-                placeholder = "Auto Center",
-                leadingIcon = {
-                    Icon(Icons.Default.Store, contentDescription = null)
-                },
+                value = state.description,
+                onValueChange = onDescriptionChanged,
+                placeholder = "Troca de oleo, pastilhas de freio etc.",
+                singleLine = false,
+                minLines = 4,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
             )
         }
@@ -365,6 +353,8 @@ private fun MaintenanceEditTextField(
     placeholder: String,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
+    singleLine: Boolean = true,
+    minLines: Int = 1,
     keyboardOptions: KeyboardOptions = KeyboardOptions(imeAction = ImeAction.Next)
 ) {
     OutlinedTextField(
@@ -380,7 +370,9 @@ private fun MaintenanceEditTextField(
         },
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
-        singleLine = true,
+        singleLine = singleLine,
+        minLines = minLines,
+        maxLines = if (singleLine) 1 else 5,
         shape = RoundedCornerShape(8.dp),
         keyboardOptions = keyboardOptions,
         colors = OutlinedTextFieldDefaults.colors(
