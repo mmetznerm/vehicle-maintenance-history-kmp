@@ -1,6 +1,7 @@
 package com.mmetzner.vehiclemaintenance.feature.vehicle.data
 
 import com.mmetzner.vehiclemaintenance.core.util.randomUuid
+import com.mmetzner.vehiclemaintenance.core.sync.OutboxSyncRequestScheduler
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.dao.OutboxDao
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.dao.VehicleDao
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.MaintenanceEntity
@@ -25,6 +26,8 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.Serializable
@@ -33,10 +36,12 @@ import kotlinx.serialization.json.Json
 class VehicleRepositoryImpl(
     private val remoteDataSource: VehicleRemoteDataSource,
     private val vehicleDao: VehicleDao,
-    private val outboxDao: OutboxDao
+    private val outboxDao: OutboxDao,
+    private val syncScheduler: OutboxSyncRequestScheduler
 ) : VehicleRepository {
 
     private val syncScope = CoroutineScope(Dispatchers.IO)
+    private val syncMutex = Mutex()
     private val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
@@ -137,9 +142,7 @@ class VehicleRepositoryImpl(
             )
         )
 
-        syncScope.launch {
-            syncPendingOutbox()
-        }
+        requestOutboxSync()
     }
 
     override suspend fun updateVehicle(vehicle: Vehicle) {
@@ -179,9 +182,7 @@ class VehicleRepositoryImpl(
             )
         }
 
-        syncScope.launch {
-            syncPendingOutbox()
-        }
+        requestOutboxSync()
     }
 
     override suspend fun deleteVehicle(vehicle: Vehicle) {
@@ -206,9 +207,7 @@ class VehicleRepositoryImpl(
             )
         }
 
-        syncScope.launch {
-            syncPendingOutbox()
-        }
+        requestOutboxSync()
     }
 
     override suspend fun addMaintenance(vehiclePlate: String, maintenance: Maintenance) {
@@ -234,9 +233,7 @@ class VehicleRepositoryImpl(
             )
         )
 
-        syncScope.launch {
-            syncPendingOutbox()
-        }
+        requestOutboxSync()
     }
 
     override suspend fun updateMaintenance(
@@ -287,9 +284,7 @@ class VehicleRepositoryImpl(
             )
         }
 
-        syncScope.launch {
-            syncPendingOutbox()
-        }
+        requestOutboxSync()
     }
 
     override suspend fun deleteMaintenance(
@@ -322,12 +317,10 @@ class VehicleRepositoryImpl(
             )
         }
 
-        syncScope.launch {
-            syncPendingOutbox()
-        }
+        requestOutboxSync()
     }
 
-    override suspend fun syncPendingOutbox() {
+    override suspend fun syncPendingOutbox() = syncMutex.withLock {
         val operations = outboxDao.getPendingOperations()
 
         for (operation in operations) {
@@ -363,6 +356,13 @@ class VehicleRepositoryImpl(
                     error = e.message ?: "Could not sync operation."
                 )
             }
+        }
+    }
+
+    private fun requestOutboxSync() {
+        syncScheduler.requestSync()
+        syncScope.launch {
+            syncPendingOutbox()
         }
     }
 
