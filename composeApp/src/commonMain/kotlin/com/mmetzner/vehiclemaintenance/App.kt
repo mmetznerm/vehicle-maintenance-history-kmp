@@ -13,6 +13,7 @@ import com.mmetzner.vehiclemaintenance.core.navigation.AddMaintenanceRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.LoginRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.RegisterRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.VehicleHomeRoute
+import com.mmetzner.vehiclemaintenance.core.navigation.VehicleListRoute
 import com.mmetzner.vehiclemaintenance.core.ui.theme.VehicleMaintenanceTheme
 import com.mmetzner.vehiclemaintenance.feature.auth.domain.repository.AuthRepository
 import com.mmetzner.vehiclemaintenance.feature.auth.presentation.login.LoginScreen
@@ -25,6 +26,8 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addvehicle.A
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addmaintenance.AddMaintenanceScreen
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.home.VehicleHomeScreen
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.home.VehicleHomeViewModel
+import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehiclelist.VehicleListScreen
+import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehiclelist.VehicleListViewModel
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -46,7 +49,7 @@ fun App() {
                     viewModel = viewModel,
                     onAuthenticated = {
                         navController.navigate(
-                            route = VehicleHomeRoute,
+                            route = VehicleListRoute,
                             navOptions = navOptions {
                                 popUpTo(LoginRoute) {
                                     inclusive = true
@@ -67,7 +70,7 @@ fun App() {
                     viewModel = viewModel,
                     onAuthenticated = {
                         navController.navigate(
-                            route = VehicleHomeRoute,
+                            route = VehicleListRoute,
                             navOptions = navOptions {
                                 popUpTo(LoginRoute) {
                                     inclusive = true
@@ -77,6 +80,35 @@ fun App() {
                     },
                     onBackToLogin = {
                         navController.popBackStack()
+                    }
+                )
+            }
+
+            composable<VehicleListRoute> {
+                val viewModel = koinViewModel<VehicleListViewModel>()
+                val authRepository = koinInject<AuthRepository>()
+                val scope = rememberCoroutineScope()
+
+                VehicleListScreen(
+                    viewModel = viewModel,
+                    onRegisterVehicle = {
+                        navController.navigate(AddVehicleRoute)
+                    },
+                    onAddMaintenance = { vehicle ->
+                        navController.navigate(AddMaintenanceRoute(vehicle.plate))
+                    },
+                    onLogout = {
+                        scope.launch {
+                            authRepository.logout()
+                            navController.navigate(
+                                route = LoginRoute,
+                                navOptions = navOptions {
+                                    popUpTo(VehicleListRoute) {
+                                        inclusive = true
+                                    }
+                                }
+                            )
+                        }
                     }
                 )
             }
