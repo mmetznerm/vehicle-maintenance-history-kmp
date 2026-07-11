@@ -23,7 +23,7 @@ class AddVehicleViewModel(
     private val _uiEvent = MutableSharedFlow<AddVehicleUiEvent>()
     val uiEvent: SharedFlow<AddVehicleUiEvent> = _uiEvent.asSharedFlow()
 
-    fun saveVehicle(plate: String, model: String, brand: String, yearStr: String) {
+    fun saveVehicle(plate: String, model: String, brand: String, yearStr: String, color: String) {
         if (plate.isBlank() || model.isBlank() || brand.isBlank()) {
             _state.update { it.copy(error = "Placa, marca e modelo são obrigatórios.") }
             return
@@ -44,7 +44,8 @@ class AddVehicleViewModel(
                     model = model.trim(),
                     brand = brand.trim(),
                     year = year,
-                    maintenances = emptyList()
+                    maintenances = emptyList(),
+                    color = color.trim()
                 )
 
                 repository.addVehicle(newVehicle)

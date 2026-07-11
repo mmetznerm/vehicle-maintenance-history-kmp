@@ -36,10 +36,11 @@ class AddVehicleViewModelTest {
         }
 
         viewModel.saveVehicle(
-            plate = "ABC1234", 
-            model = "Civic", 
-            brand = "Honda", 
-            yearStr = "2022"
+            plate = "ABC1234",
+            model = "Civic",
+            brand = "Honda",
+            yearStr = "2022",
+            color = "Prata"
         )
         advanceUntilIdle()
 
@@ -47,6 +48,7 @@ class AddVehicleViewModelTest {
         assertEquals("ABC1234", repository.addedVehicle?.plate)
         assertEquals("Civic", repository.addedVehicle?.model)
         assertEquals(2022, repository.addedVehicle?.year)
+        assertEquals("Prata", repository.addedVehicle?.color)
         assertEquals(1, emittedEvents.size)
         assertTrue(emittedEvents.first() is AddVehicleUiEvent.NavigateBack)
         job.cancel()
@@ -59,7 +61,7 @@ class AddVehicleViewModelTest {
             viewModel.uiEvent.collect { emittedEvents.add(it) }
         }
 
-        viewModel.saveVehicle(plate = "   ", model = "Civic", brand = "Honda", yearStr = "2022")
+        viewModel.saveVehicle(plate = "   ", model = "Civic", brand = "Honda", yearStr = "2022", color = "")
         advanceUntilIdle()
 
         assertNull(repository.addedVehicle, "Não deve salvar se a placa for inválida")
@@ -74,7 +76,13 @@ class AddVehicleViewModelTest {
             viewModel.uiEvent.collect { emittedEvents.add(it) }
         }
 
-        viewModel.saveVehicle(plate = "ABC1234", model = "Civic", brand = "Honda", yearStr = "Dois Mil e Vinte")
+        viewModel.saveVehicle(
+            plate = "ABC1234",
+            model = "Civic",
+            brand = "Honda",
+            yearStr = "Dois Mil e Vinte",
+            color = ""
+        )
         advanceUntilIdle()
 
         assertNull(repository.addedVehicle)
