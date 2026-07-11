@@ -6,6 +6,8 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.Mainten
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.SyncStatus
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.VehicleEntity
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.local.entity.VehicleWithMaintenances
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.CreateMaintenanceRequest
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.CreateVehicleRequest
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.MaintenanceResponse
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.VehicleResponse
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
@@ -13,25 +15,26 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
 
 fun VehicleResponse.toEntity() = VehicleEntity(
     plate = this.plate,
+    id = this.id,
     model = this.model,
     brand = this.brand,
-    year = this.year
+    year = this.manufactureYear,
+    color = this.color.orEmpty()
 )
 
 fun MaintenanceResponse.toEntity(vehiclePlate: String) = MaintenanceEntity(
     id = this.id,
+    vehicleId = this.vehicleId,
     vehiclePlate = vehiclePlate,
-    date = this.date,
+    date = this.maintenanceDate,
     description = this.description,
-    workshopName = this.workshopName,
-    mileage = this.mileage,
-    totalValue = this.totalValue
+    workshopName = null,
+    mileage = this.odometer,
+    totalValue = this.cost
 )
 
 fun MaintenanceResponse.toPhotoEntities(maintenanceId: String): List<MaintenancePhotoEntity> {
-    return this.photoUrls?.map { url ->
-        MaintenancePhotoEntity(maintenanceId = maintenanceId, url = url)
-    } ?: emptyList()
+    return emptyList()
 }
 
 fun VehicleWithMaintenances.toDomain() = Vehicle(
@@ -40,7 +43,9 @@ fun VehicleWithMaintenances.toDomain() = Vehicle(
     brand = this.vehicle.brand,
     year = this.vehicle.year,
     isPendingSync = this.vehicle.syncStatus == SyncStatus.PENDING,
-    maintenances = this.maintenances.map { it.toDomain() }
+    maintenances = this.maintenances.map { it.toDomain() },
+    id = this.vehicle.id,
+    color = this.vehicle.color
 )
 
 fun MaintenanceWithPhotos.toDomain() = Maintenance(
@@ -51,33 +56,33 @@ fun MaintenanceWithPhotos.toDomain() = Maintenance(
     mileage = this.maintenance.mileage,
     totalValue = this.maintenance.totalValue,
     isPendingSync = this.maintenance.syncStatus == SyncStatus.PENDING,
-    photoUrls = this.photos.map { it.url }
+    photoUrls = this.photos.map { it.url },
+    vehicleId = this.maintenance.vehicleId
 )
 
 fun Vehicle.toPendingEntity() = VehicleEntity(
     plate = this.plate,
+    id = this.id,
     model = this.model,
     brand = this.brand,
     year = this.year,
+    color = this.color,
     syncStatus = SyncStatus.PENDING
 )
 
-fun VehicleEntity.toRequestDto() = VehicleResponse(
+fun VehicleEntity.toRequestDto() = CreateVehicleRequest(
     plate = this.plate,
     model = this.model,
     brand = this.brand,
-    year = this.year,
-    maintenances = null
+    manufactureYear = this.year,
+    color = this.color.ifBlank { null }
 )
 
-fun MaintenanceEntity.toRequestDto() = MaintenanceResponse(
-    id = this.id,
-    date = this.date,
+fun MaintenanceEntity.toRequestDto() = CreateMaintenanceRequest(
+    maintenanceDate = this.date,
+    odometer = this.mileage ?: 0,
     description = this.description,
-    workshopName = this.workshopName,
-    mileage = this.mileage,
-    totalValue = this.totalValue,
-    photoUrls = emptyList()
+    cost = this.totalValue ?: 0.0
 )
 
 

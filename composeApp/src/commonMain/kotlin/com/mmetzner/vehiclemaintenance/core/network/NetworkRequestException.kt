@@ -15,3 +15,11 @@ fun HttpStatusCode.toNetworkRequestException(operation: String): NetworkRequestE
         operation = operation
     )
 }
+
+fun Int.toNetworkRequestException(operation: String): NetworkRequestException {
+    return NetworkRequestException(
+        statusCode = this,
+        reason = "Not Found",
+        operation = operation
+    )
+}
