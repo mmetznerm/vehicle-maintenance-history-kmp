@@ -12,6 +12,7 @@ import com.mmetzner.vehiclemaintenance.core.navigation.AddVehicleRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.AddMaintenanceRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.LoginRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.RegisterRoute
+import com.mmetzner.vehiclemaintenance.core.navigation.VehicleDetailsRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.VehicleHomeRoute
 import com.mmetzner.vehiclemaintenance.core.navigation.VehicleListRoute
 import com.mmetzner.vehiclemaintenance.core.ui.theme.VehicleMaintenanceTheme
@@ -26,6 +27,8 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addvehicle.A
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addmaintenance.AddMaintenanceScreen
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.home.VehicleHomeScreen
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.home.VehicleHomeViewModel
+import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicledetails.VehicleDetailsScreen
+import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicledetails.VehicleDetailsViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehiclelist.VehicleListScreen
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehiclelist.VehicleListViewModel
 import kotlinx.coroutines.launch
@@ -94,6 +97,11 @@ fun App() {
                     onRegisterVehicle = {
                         navController.navigate(AddVehicleRoute)
                     },
+                    onOpenVehicle = { vehicle ->
+                        vehicle.id?.let { vehicleId ->
+                            navController.navigate(VehicleDetailsRoute(vehicleId))
+                        }
+                    },
                     onAddMaintenance = { vehicle ->
                         navController.navigate(AddMaintenanceRoute(vehicle.plate))
                     },
@@ -109,6 +117,22 @@ fun App() {
                                 }
                             )
                         }
+                    }
+                )
+            }
+
+            composable<VehicleDetailsRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<VehicleDetailsRoute>()
+                val viewModel = koinViewModel<VehicleDetailsViewModel>()
+
+                VehicleDetailsScreen(
+                    viewModel = viewModel,
+                    vehicleId = route.vehicleId,
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onAddMaintenance = { vehicle ->
+                        navController.navigate(AddMaintenanceRoute(vehicle.plate))
                     }
                 )
             }

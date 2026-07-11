@@ -59,6 +59,12 @@ class VehicleRepositoryImpl(
         }
     }
 
+    override suspend fun observeVehicleById(vehicleId: String): Flow<Vehicle?> {
+        return vehicleDao.observeVehicleById(vehicleId).map { relation ->
+            relation?.toDomain()
+        }
+    }
+
     override suspend fun syncVehicles(): Result<Unit> {
         return try {
             val vehicles = remoteDataSource.listVehicles()
@@ -83,6 +89,23 @@ class VehicleRepositoryImpl(
         return try {
             val dto = remoteDataSource.getVehicleByPlate(plate)
             val maintenances = remoteDataSource.listMaintenances(dto.id)
+
+            val vehicleEntity = dto.toEntity()
+            val maintenanceEntities = maintenances.map { it.toEntity(dto.plate) }
+            val photoEntities = maintenances.flatMap { it.toPhotoEntities(it.id) }
+
+            vehicleDao.syncVehicleData(vehicleEntity, maintenanceEntities, photoEntities)
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun syncVehicleById(vehicleId: String): Result<Unit> {
+        return try {
+            val dto = remoteDataSource.getVehicle(vehicleId)
+            val maintenances = remoteDataSource.listMaintenances(vehicleId)
 
             val vehicleEntity = dto.toEntity()
             val maintenanceEntities = maintenances.map { it.toEntity(dto.plate) }
