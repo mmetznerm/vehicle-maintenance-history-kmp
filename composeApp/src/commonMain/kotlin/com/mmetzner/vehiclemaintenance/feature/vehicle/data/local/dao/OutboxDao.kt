@@ -40,4 +40,13 @@ interface OutboxDao {
 
     @Query("DELETE FROM outbox_operations WHERE id = :id")
     suspend fun delete(id: String)
+
+    @Query("DELETE FROM outbox_operations WHERE aggregateType = :aggregateType AND aggregateId = :aggregateId")
+    suspend fun deleteForAggregate(
+        aggregateType: String,
+        aggregateId: String
+    )
+
+    @Query("DELETE FROM outbox_operations WHERE parentAggregateId = :parentAggregateId")
+    suspend fun deleteForParentAggregate(parentAggregateId: String)
 }

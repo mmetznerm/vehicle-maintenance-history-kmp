@@ -18,6 +18,9 @@ object VehicleListRoute
 data class VehicleDetailsRoute(val vehicleId: String)
 
 @Serializable
+data class VehicleEditRoute(val vehicleId: String)
+
+@Serializable
 object AddVehicleRoute
 
 @Serializable

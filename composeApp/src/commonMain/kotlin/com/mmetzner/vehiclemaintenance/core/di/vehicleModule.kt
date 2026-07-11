@@ -8,6 +8,7 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addvehicle.A
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.home.VehicleHomeViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.search.VehicleSearchViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicledetails.VehicleDetailsViewModel
+import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicleedit.VehicleEditViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehiclelist.VehicleListViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -18,6 +19,7 @@ val vehicleModule = module {
     viewModel { VehicleSearchViewModel(get()) }
     viewModel { VehicleListViewModel(get()) }
     viewModel { VehicleDetailsViewModel(get()) }
+    viewModel { VehicleEditViewModel(get()) }
     viewModel { VehicleHomeViewModel(get()) }
     viewModel { AddVehicleViewModel(get()) }
     viewModel { AddMaintenanceViewModel(get()) }

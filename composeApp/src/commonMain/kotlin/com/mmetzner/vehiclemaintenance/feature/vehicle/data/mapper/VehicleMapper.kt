@@ -90,6 +90,14 @@ fun VehicleEntity.toRequestDto() = CreateVehicleRequest(
     color = this.color.ifBlank { null }
 )
 
+fun Vehicle.toRequestDto() = CreateVehicleRequest(
+    plate = this.plate,
+    model = this.model,
+    brand = this.brand,
+    manufactureYear = this.year,
+    color = this.color.ifBlank { null }
+)
+
 fun MaintenanceEntity.toRequestDto() = CreateMaintenanceRequest(
     maintenanceDate = this.date,
     odometer = this.mileage ?: 0,
