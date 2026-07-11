@@ -24,11 +24,20 @@ class FakeOfflineFirstRepository : VehicleRepository {
         return databaseFlow
     }
 
+    override suspend fun observeVehicleById(vehicleId: String): Flow<Vehicle?> {
+        return databaseFlow
+    }
+
     override suspend fun observePrimaryVehicle(): Flow<Vehicle?> {
         return databaseFlow
     }
 
     override suspend fun syncVehicle(plate: String): Result<Unit> {
+        syncCalled = true
+        return networkResult
+    }
+
+    override suspend fun syncVehicleById(vehicleId: String): Result<Unit> {
         syncCalled = true
         return networkResult
     }

@@ -59,6 +59,7 @@ private val ListMuted = Color(0xFF667085)
 fun VehicleListScreen(
     viewModel: VehicleListViewModel,
     onRegisterVehicle: () -> Unit,
+    onOpenVehicle: (Vehicle) -> Unit,
     onAddMaintenance: (Vehicle) -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
@@ -101,6 +102,7 @@ fun VehicleListScreen(
                     VehicleListContent(
                         state = state,
                         onRegisterVehicle = onRegisterVehicle,
+                        onOpenVehicle = onOpenVehicle,
                         onAddMaintenance = onAddMaintenance,
                         onRetry = viewModel::refreshVehicles
                     )
@@ -181,6 +183,7 @@ private fun VehicleListTopBar(
 private fun VehicleListContent(
     state: VehicleListState,
     onRegisterVehicle: () -> Unit,
+    onOpenVehicle: (Vehicle) -> Unit,
     onAddMaintenance: (Vehicle) -> Unit,
     onRetry: () -> Unit
 ) {
@@ -216,6 +219,7 @@ private fun VehicleListContent(
         ) { vehicle ->
             VehicleListCard(
                 vehicle = vehicle,
+                onOpenVehicle = { onOpenVehicle(vehicle) },
                 onAddMaintenance = { onAddMaintenance(vehicle) }
             )
         }
@@ -261,6 +265,7 @@ private fun VehicleListHeader(
 @Composable
 private fun VehicleListCard(
     vehicle: Vehicle,
+    onOpenVehicle: () -> Unit,
     onAddMaintenance: () -> Unit
 ) {
     Card(
@@ -322,14 +327,28 @@ private fun VehicleListCard(
                 }
             }
 
-            FilledTonalButton(
-                onClick = onAddMaintenance,
-                modifier = Modifier.align(Alignment.End),
-                shape = RoundedCornerShape(8.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
             ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(Modifier.width(6.dp))
-                Text("Nova manutencao")
+                FilledTonalButton(
+                    onClick = onOpenVehicle,
+                    enabled = vehicle.id != null,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(if (vehicle.id == null) "Sincronizando" else "Detalhes")
+                }
+
+                Spacer(Modifier.width(8.dp))
+
+                FilledTonalButton(
+                    onClick = onAddMaintenance,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Spacer(Modifier.width(6.dp))
+                    Text("Nova manutencao")
+                }
             }
         }
     }
