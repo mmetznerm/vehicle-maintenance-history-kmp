@@ -12,7 +12,7 @@ import org.koin.dsl.module
 
 val vehicleModule = module {
     single { VehicleRemoteDataSource(get(), get()) }
-    single<VehicleRepository> { VehicleRepositoryImpl(get(), get()) }
+    single<VehicleRepository> { VehicleRepositoryImpl(get(), get(), get()) }
     viewModel { VehicleSearchViewModel(get()) }
     viewModel { VehicleHomeViewModel(get()) }
     viewModel { AddVehicleViewModel(get()) }

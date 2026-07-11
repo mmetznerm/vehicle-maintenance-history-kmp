@@ -24,6 +24,7 @@ fun VehicleResponse.toEntity() = VehicleEntity(
 
 fun MaintenanceResponse.toEntity(vehiclePlate: String) = MaintenanceEntity(
     id = this.id,
+    remoteId = this.id,
     vehicleId = this.vehicleId,
     vehiclePlate = vehiclePlate,
     date = this.maintenanceDate,
@@ -57,7 +58,8 @@ fun MaintenanceWithPhotos.toDomain() = Maintenance(
     totalValue = this.maintenance.totalValue,
     isPendingSync = this.maintenance.syncStatus == SyncStatus.PENDING,
     photoUrls = this.photos.map { it.url },
-    vehicleId = this.maintenance.vehicleId
+    vehicleId = this.maintenance.vehicleId,
+    remoteId = this.maintenance.remoteId
 )
 
 fun Vehicle.toPendingEntity() = VehicleEntity(

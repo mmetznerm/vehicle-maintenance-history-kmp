@@ -65,8 +65,21 @@ interface VehicleDao {
     @Query("UPDATE maintenances SET syncStatus = :newStatus WHERE id = :id")
     suspend fun updateMaintenanceSyncStatus(id: String, newStatus: String)
 
-    @Query("UPDATE maintenances SET vehicleId = :vehicleId, syncStatus = :newStatus WHERE id = :id")
-    suspend fun updateMaintenanceAfterSync(id: String, vehicleId: String, newStatus: String)
+    @Query(
+        """
+        UPDATE maintenances
+        SET remoteId = :remoteId,
+            vehicleId = :vehicleId,
+            syncStatus = :newStatus
+        WHERE id = :id
+        """
+    )
+    suspend fun updateMaintenanceAfterSync(
+        id: String,
+        remoteId: String,
+        vehicleId: String,
+        newStatus: String
+    )
 }
 
 
