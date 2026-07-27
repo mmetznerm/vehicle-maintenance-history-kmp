@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import vehiclemaintenance.composeapp.generated.resources.*
 
 class RegisterViewModel(
     private val authRepository: AuthRepository
@@ -40,12 +41,12 @@ class RegisterViewModel(
         val password = currentState.password
 
         if (fullName.isBlank() || emailOrPhone.isBlank() || password.isBlank()) {
-            _state.update { it.copy(errorMessage = "Full name, email or phone, and password are required.") }
+            _state.update { it.copy(errorMessage = Res.string.error_register_required) }
             return
         }
 
         if (password.length < 8) {
-            _state.update { it.copy(errorMessage = "Password must have at least 8 characters.") }
+            _state.update { it.copy(errorMessage = Res.string.error_password_too_short) }
             return
         }
 

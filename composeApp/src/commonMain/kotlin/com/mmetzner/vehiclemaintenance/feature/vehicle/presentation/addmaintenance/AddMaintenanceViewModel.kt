@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import vehiclemaintenance.composeapp.generated.resources.*
 
 class AddMaintenanceViewModel(
     private val repository: VehicleRepository
@@ -53,24 +55,24 @@ class AddMaintenanceViewModel(
                 )
                 _state.update { it.copy(isSaving = false, success = true) }
             } catch (e: Exception) {
-                _state.update { it.copy(isSaving = false, error = e.message) }
+                _state.update { it.copy(isSaving = false, error = Res.string.error_save_maintenance) }
             }
         }
     }
 }
 
-private fun validateMaintenance(state: AddMaintenanceState): String? {
+private fun validateMaintenance(state: AddMaintenanceState): StringResource? {
     val mileage = state.mileage.toIntOrNull()
     val totalValue = state.totalValue.toCurrencyDoubleOrNull()
 
     return when {
-        state.date.isBlank() -> "Informe a data da manutencao."
-        state.mileage.isBlank() -> "Informe o odometro."
-        mileage == null || mileage < 0 -> "Informe um odometro valido."
-        state.totalValue.isBlank() -> "Informe o custo total."
-        totalValue == null || totalValue < 0.0 -> "Informe um custo valido."
-        state.description.isBlank() -> "Informe a descricao do servico."
-        state.description.trim().length > 500 -> "Use no maximo 500 caracteres."
+        state.date.isBlank() -> Res.string.error_maintenance_date_required
+        state.mileage.isBlank() -> Res.string.error_maintenance_odometer_required
+        mileage == null || mileage < 0 -> Res.string.error_maintenance_odometer_invalid
+        state.totalValue.isBlank() -> Res.string.error_maintenance_cost_required
+        totalValue == null || totalValue < 0.0 -> Res.string.error_maintenance_cost_invalid
+        state.description.isBlank() -> Res.string.error_maintenance_description_required
+        state.description.trim().length > 500 -> Res.string.error_maintenance_description_too_long
         else -> null
     }
 }

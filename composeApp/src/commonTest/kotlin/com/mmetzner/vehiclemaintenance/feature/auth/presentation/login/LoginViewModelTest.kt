@@ -11,8 +11,10 @@ import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import vehiclemaintenance.composeapp.generated.resources.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LoginViewModelTest {
@@ -42,7 +44,7 @@ class LoginViewModelTest {
 
         assertFalse(repository.loginCalled)
         assertFalse(viewModel.state.value.isAuthenticated)
-        assertTrue(viewModel.state.value.errorMessage?.contains("required") == true)
+        assertEquals(Res.string.error_login_required, viewModel.state.value.errorMessage)
     }
 
     @Test
@@ -73,7 +75,7 @@ class LoginViewModelTest {
 
         assertTrue(repository.loginCalled)
         assertFalse(viewModel.state.value.isAuthenticated)
-        assertTrue(viewModel.state.value.errorMessage?.contains("Could not connect") == true)
+        assertEquals(Res.string.error_server_connection, viewModel.state.value.errorMessage)
     }
 
     @Test

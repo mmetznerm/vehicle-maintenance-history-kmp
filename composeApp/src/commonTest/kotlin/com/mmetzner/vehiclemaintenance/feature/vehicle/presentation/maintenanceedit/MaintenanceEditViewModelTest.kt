@@ -35,7 +35,7 @@ class MaintenanceEditViewModelTest {
     }
 
     @Test
-    fun `quando existe manutencao local deve preencher formulario pelo cache`() = runTest {
+    fun `loads form from local maintenance cache`() = runTest {
         repository.databaseFlow.value = vehicleWithMaintenance()
 
         val viewModel = MaintenanceEditViewModel(repository)
@@ -43,7 +43,7 @@ class MaintenanceEditViewModelTest {
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.isLoading)
-        assertEquals("Troca de oleo", viewModel.state.value.description)
+        assertEquals("Oil change", viewModel.state.value.description)
         assertEquals("2026-07-10", viewModel.state.value.date)
         assertEquals("45000", viewModel.state.value.mileage)
         assertEquals("250.0", viewModel.state.value.totalValue)
@@ -51,14 +51,14 @@ class MaintenanceEditViewModelTest {
     }
 
     @Test
-    fun `ao salvar deve persistir alteracao local para sincronizar depois`() = runTest {
+    fun `saves local changes for later synchronization`() = runTest {
         repository.databaseFlow.value = vehicleWithMaintenance()
 
         val viewModel = MaintenanceEditViewModel(repository)
         viewModel.load("vehicle-id", "maintenance-remote-id")
         advanceUntilIdle()
 
-        viewModel.onDescriptionChanged("Revisao")
+        viewModel.onDescriptionChanged("Inspection")
         viewModel.onDateChanged("2026-07-11")
         viewModel.onMileageChanged("46000")
         viewModel.onTotalValueChanged("300,50")
@@ -69,7 +69,7 @@ class MaintenanceEditViewModelTest {
         assertEquals("ABC1234", repository.updatedMaintenanceVehiclePlate)
         assertEquals("maintenance-local-id", updatedMaintenance?.id)
         assertEquals("maintenance-remote-id", updatedMaintenance?.remoteId)
-        assertEquals("Revisao", updatedMaintenance?.description)
+        assertEquals("Inspection", updatedMaintenance?.description)
         assertEquals("2026-07-11", updatedMaintenance?.date)
         assertEquals(46000, updatedMaintenance?.mileage)
         assertEquals(300.50, updatedMaintenance?.totalValue)
@@ -78,7 +78,7 @@ class MaintenanceEditViewModelTest {
     }
 
     @Test
-    fun `ao excluir deve remover manutencao local para sincronizar depois`() = runTest {
+    fun `deletes maintenance locally for later synchronization`() = runTest {
         val vehicle = vehicleWithMaintenance()
         repository.databaseFlow.value = vehicle
 
@@ -106,7 +106,7 @@ private fun vehicleWithMaintenance() = Vehicle(
             remoteId = "maintenance-remote-id",
             vehicleId = "vehicle-id",
             date = "2026-07-10",
-            description = "Troca de oleo",
+            description = "Oil change",
             workshopName = "Auto Center",
             mileage = 45000,
             totalValue = 250.0

@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,7 +48,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewVehicle
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewVehicleRepository
+import com.mmetzner.vehiclemaintenance.core.ui.theme.VehicleMaintenanceTheme
+import org.jetbrains.compose.resources.stringResource
+import vehiclemaintenance.composeapp.generated.resources.*
 
 private val MaintenanceBlue = Color(0xFF0B5CFF)
 private val MaintenanceBackground = Color(0xFFF7F8FA)
@@ -89,7 +96,7 @@ fun AddMaintenanceScreen(
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = "Nova manutencao",
+                    text = stringResource(Res.string.maintenance_new_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Black,
                     color = Color(0xFF111827)
@@ -136,12 +143,12 @@ private fun MaintenanceTopBar(onBack: () -> Unit) {
         IconButton(onClick = onBack) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar",
+            contentDescription = stringResource(Res.string.action_back),
                 tint = Color(0xFF111827)
             )
         }
         Text(
-            text = "Adicionar manutencao",
+            text = stringResource(Res.string.maintenance_add_title),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Black,
             color = Color(0xFF111827)
@@ -163,22 +170,22 @@ private fun MaintenanceForm(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        MaintenanceFieldGroup(label = "DATA DA MANUTENCAO") {
+        MaintenanceFieldGroup(label = stringResource(Res.string.maintenance_field_date)) {
             MaintenanceTextField(
                 value = state.date,
                 onValueChange = onDateChanged,
-                placeholder = "2026-07-11",
+                placeholder = stringResource(Res.string.maintenance_date_placeholder),
                 trailingIcon = {
                     Icon(Icons.Default.CalendarMonth, contentDescription = null)
                 }
             )
         }
 
-        MaintenanceFieldGroup(label = "ODOMETRO") {
+        MaintenanceFieldGroup(label = stringResource(Res.string.maintenance_field_odometer)) {
             MaintenanceTextField(
                 value = state.mileage,
                 onValueChange = onMileageChanged,
-                placeholder = "45000",
+                placeholder = stringResource(Res.string.maintenance_odometer_placeholder),
                 trailingIcon = {
                     Icon(Icons.Default.Speed, contentDescription = null)
                 },
@@ -189,11 +196,11 @@ private fun MaintenanceForm(
             )
         }
 
-        MaintenanceFieldGroup(label = "CUSTO TOTAL") {
+        MaintenanceFieldGroup(label = stringResource(Res.string.maintenance_field_total_cost)) {
             MaintenanceTextField(
                 value = state.totalValue,
                 onValueChange = onTotalValueChanged,
-                placeholder = "0,00",
+                placeholder = stringResource(Res.string.maintenance_cost_placeholder),
                 leadingIcon = {
                     Icon(Icons.Default.Payments, contentDescription = null)
                 },
@@ -204,11 +211,11 @@ private fun MaintenanceForm(
             )
         }
 
-        MaintenanceFieldGroup(label = "DESCRICAO DO SERVICO") {
+        MaintenanceFieldGroup(label = stringResource(Res.string.maintenance_field_description)) {
             MaintenanceTextField(
                 value = state.description,
                 onValueChange = onDescriptionChanged,
-                placeholder = "Troca de oleo, pastilhas de freio etc.",
+                placeholder = stringResource(Res.string.maintenance_description_placeholder),
                 singleLine = false,
                 minLines = 4,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -220,7 +227,7 @@ private fun MaintenanceForm(
 
         state.error?.let { error ->
             Text(
-                text = error,
+                text = stringResource(error),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.fillMaxWidth(),
@@ -234,7 +241,7 @@ private fun MaintenanceForm(
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextButton(onClick = onCancel, enabled = !state.isSaving) {
-                Text("Cancelar")
+                Text(stringResource(Res.string.action_cancel))
             }
 
             Spacer(Modifier.width(8.dp))
@@ -255,7 +262,7 @@ private fun MaintenanceForm(
                         color = Color.White
                     )
                 } else {
-                    Text("Salvar", fontWeight = FontWeight.Bold)
+                    Text(stringResource(Res.string.action_save), fontWeight = FontWeight.Bold)
                     Spacer(Modifier.width(8.dp))
                     Icon(Icons.Default.CheckCircle, contentDescription = null)
                 }
@@ -320,4 +327,27 @@ private fun MaintenanceTextField(
             cursorColor = MaintenanceBlue
         )
     )
+}
+
+@Preview
+@Composable
+private fun AddMaintenanceScreenPreview() {
+    val viewModel = remember {
+        AddMaintenanceViewModel(PreviewVehicleRepository).apply {
+            onEvent(AddMaintenanceEvent.SetPlate(PreviewVehicle.plate))
+            onEvent(AddMaintenanceEvent.UpdateDate("2026-07-27"))
+            onEvent(AddMaintenanceEvent.UpdateMileage("45800"))
+            onEvent(AddMaintenanceEvent.UpdateValue("320.00"))
+            onEvent(AddMaintenanceEvent.UpdateDescription("Preventive maintenance"))
+        }
+    }
+
+    VehicleMaintenanceTheme {
+        AddMaintenanceScreen(
+            viewModel = viewModel,
+            onBack = {},
+            onSuccess = {},
+            plate = PreviewVehicle.plate
+        )
+    }
 }

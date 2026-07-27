@@ -34,7 +34,7 @@ class VehicleEditViewModelTest {
     }
 
     @Test
-    fun `quando existe veiculo local deve preencher formulario pelo cache`() = runTest {
+    fun `loads form from local vehicle cache`() = runTest {
         repository.databaseFlow.value = Vehicle(
             plate = "ABC1234",
             model = "Civic",
@@ -42,7 +42,7 @@ class VehicleEditViewModelTest {
             year = 2022,
             maintenances = emptyList(),
             id = "vehicle-id",
-            color = "Prata"
+            color = "Silver"
         )
 
         val viewModel = VehicleEditViewModel(repository)
@@ -54,12 +54,12 @@ class VehicleEditViewModelTest {
         assertEquals("Honda", viewModel.state.value.brand)
         assertEquals("Civic", viewModel.state.value.model)
         assertEquals("2022", viewModel.state.value.year)
-        assertEquals("Prata", viewModel.state.value.color)
+        assertEquals("Silver", viewModel.state.value.color)
         assertTrue(repository.syncCalled)
     }
 
     @Test
-    fun `ao salvar deve persistir alteracao local para sincronizar depois`() = runTest {
+    fun `saves local changes for later synchronization`() = runTest {
         repository.databaseFlow.value = Vehicle(
             plate = "ABC1234",
             model = "Civic",
@@ -67,7 +67,7 @@ class VehicleEditViewModelTest {
             year = 2022,
             maintenances = emptyList(),
             id = "vehicle-id",
-            color = "Prata"
+            color = "Silver"
         )
 
         val viewModel = VehicleEditViewModel(repository)
@@ -77,7 +77,7 @@ class VehicleEditViewModelTest {
         viewModel.onModelChanged("Corolla")
         viewModel.onBrandChanged("Toyota")
         viewModel.onYearChanged("2024")
-        viewModel.onColorChanged("Branco")
+        viewModel.onColorChanged("White")
         viewModel.save()
         advanceUntilIdle()
 
@@ -86,12 +86,12 @@ class VehicleEditViewModelTest {
         assertEquals("Toyota", updatedVehicle?.brand)
         assertEquals("Corolla", updatedVehicle?.model)
         assertEquals(2024, updatedVehicle?.year)
-        assertEquals("Branco", updatedVehicle?.color)
+        assertEquals("White", updatedVehicle?.color)
         assertEquals(true, updatedVehicle?.isPendingSync)
     }
 
     @Test
-    fun `ao excluir deve remover localmente para sincronizar depois`() = runTest {
+    fun `deletes vehicle locally for later synchronization`() = runTest {
         val vehicle = Vehicle(
             plate = "ABC1234",
             model = "Civic",

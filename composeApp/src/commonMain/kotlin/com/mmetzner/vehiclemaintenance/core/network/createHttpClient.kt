@@ -28,7 +28,9 @@ fun createHttpClient(
                 }
                 sendWithoutRequest { request ->
                     val url = request.url.toString()
-                    !url.endsWith("/v1/auth/login") && !url.endsWith("/v1/auth/register")
+                    !url.endsWith("/v1/auth/login") &&
+                        !url.endsWith("/v1/auth/register") &&
+                        !url.endsWith("/v1/auth/logout")
                 }
             }
         }

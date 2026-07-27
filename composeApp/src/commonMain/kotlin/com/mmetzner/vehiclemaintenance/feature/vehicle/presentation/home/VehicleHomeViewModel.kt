@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import vehiclemaintenance.composeapp.generated.resources.*
 
 class VehicleHomeViewModel(
     private val repository: VehicleRepository
@@ -32,7 +33,7 @@ class VehicleHomeViewModel(
                 }
             } catch (e: Exception) {
                 _state.value = VehicleHomeState.Error(
-                    e.message ?: "Could not load your vehicle."
+                    Res.string.error_load_primary_vehicle
                 )
             }
         }

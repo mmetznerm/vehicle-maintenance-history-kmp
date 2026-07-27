@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material.icons.filled.NotificationsNone
-import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.AssistChip
@@ -63,9 +62,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mmetzner.vehiclemaintenance.core.ui.components.LogoutOverflowMenu
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewVehicle
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewVehicleRepository
+import com.mmetzner.vehiclemaintenance.core.ui.theme.VehicleMaintenanceTheme
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
+import org.jetbrains.compose.resources.stringResource
+import vehiclemaintenance.composeapp.generated.resources.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,7 +92,7 @@ fun VehicleSearchScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Veículos",
+                        text = stringResource(Res.string.vehicles_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -99,24 +105,13 @@ fun VehicleSearchScreen(
                     IconButton(onClick = {}) {
                         Icon(
                             imageVector = Icons.Default.NotificationsNone,
-                            contentDescription = "Notificações"
+                            contentDescription = stringResource(Res.string.accessibility_notifications)
                         )
                     }
-                    Surface(
-                        modifier = Modifier
-                            .padding(end = 12.dp)
-                            .size(36.dp),
-                        shape = RoundedCornerShape(18.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ) {
-                        IconButton(onClick = onLogout) {
-                            Icon(
-                                imageVector = Icons.Default.PersonOutline,
-                                contentDescription = "Conta"
-                            )
-                        }
-                    }
+                    LogoutOverflowMenu(
+                        onLogout = onLogout,
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
                 }
             )
         }
@@ -164,7 +159,7 @@ fun VehicleSearchScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = currentState.message,
+                            text = stringResource(currentState.message),
                             color = MaterialTheme.colorScheme.onErrorContainer,
                             modifier = Modifier.padding(16.dp),
                             textAlign = TextAlign.Center
@@ -196,7 +191,7 @@ private fun VehicleTabs(onAddVehicle: () -> Unit) {
         ) {
             Icon(Icons.Default.Search, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text("Pesquisar")
+            Text(stringResource(Res.string.action_search))
         }
 
         OutlinedButton(
@@ -206,7 +201,7 @@ private fun VehicleTabs(onAddVehicle: () -> Unit) {
         ) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text("Cadastrar")
+            Text(stringResource(Res.string.action_register))
         }
     }
 }
@@ -232,8 +227,8 @@ private fun SearchCard(
             OutlinedTextField(
                 value = plateQuery,
                 onValueChange = onPlateChange,
-                label = { Text("Placa") },
-                placeholder = { Text("ABC-1234") },
+                label = { Text(stringResource(Res.string.vehicle_plate_label)) },
+                placeholder = { Text(stringResource(Res.string.placeholder_plate)) },
                 leadingIcon = {
                     Icon(Icons.Default.DirectionsCar, contentDescription = null)
                 },
@@ -252,7 +247,10 @@ private fun SearchCard(
                 modifier = Modifier.height(56.dp),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.Default.Search, contentDescription = "Buscar")
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = stringResource(Res.string.action_search)
+                )
             }
         }
     }
@@ -284,14 +282,14 @@ private fun EmptyVehicleState(
         }
 
         Text(
-            text = "Busque por uma placa",
+            text = stringResource(Res.string.vehicle_search_by_plate),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center
         )
 
         Text(
-            text = "Consulte históricos sincronizados ou cadastre um veículo para começar.",
+            text = stringResource(Res.string.vehicle_search_description),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -301,7 +299,7 @@ private fun EmptyVehicleState(
         FilledTonalButton(onClick = onAddVehicle) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text("Cadastrar veículo")
+            Text(stringResource(Res.string.action_register_vehicle))
         }
     }
 }
@@ -337,12 +335,22 @@ private fun VehicleResultCard(
 
                     Column {
                         Text(
-                            text = "${vehicle.brand} ${vehicle.model}",
+                            text = stringResource(
+                                Res.string.vehicle_name,
+                                vehicle.brand,
+                                vehicle.model
+                            ),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = "${vehicle.year} · Prata",
+                            text = stringResource(
+                                Res.string.vehicle_year_and_color,
+                                vehicle.year,
+                                vehicle.color.ifBlank {
+                                    stringResource(Res.string.vehicle_color_not_provided)
+                                }
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -360,8 +368,14 @@ private fun VehicleResultCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                VehicleInfoChip(Icons.Default.Speed, "47.820 km")
-                VehicleInfoChip(Icons.Default.LocalGasStation, "Flex")
+                VehicleInfoChip(
+                    Icons.Default.Speed,
+                    stringResource(Res.string.vehicle_sample_odometer)
+                )
+                VehicleInfoChip(
+                    Icons.Default.LocalGasStation,
+                    stringResource(Res.string.vehicle_fuel_flex)
+                )
                 VehicleInfoChip(Icons.Default.CalendarMonth, vehicle.year.toString())
             }
 
@@ -373,7 +387,7 @@ private fun VehicleResultCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Histórico de manutenções",
+                    text = stringResource(Res.string.maintenance_history_sentence),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -384,13 +398,13 @@ private fun VehicleResultCard(
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
-                    Text("Nova")
+                    Text(stringResource(Res.string.action_new))
                 }
             }
 
             if (vehicle.maintenances.isNullOrEmpty()) {
                 Text(
-                    text = "Nenhum registro encontrado.",
+                    text = stringResource(Res.string.vehicle_no_records),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -467,7 +481,10 @@ private fun MaintenanceItem(maintenance: Maintenance) {
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = "R$ ${maintenance.totalValue ?: 0.0}",
+                    text = stringResource(
+                        Res.string.maintenance_currency,
+                        (maintenance.totalValue ?: 0.0).toString()
+                    ),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -475,7 +492,12 @@ private fun MaintenanceItem(maintenance: Maintenance) {
             }
 
             Text(
-                text = "${maintenance.date}  |  ${maintenance.mileage ?: "--"} km",
+                text = stringResource(
+                    Res.string.maintenance_date_mileage,
+                    maintenance.date,
+                    maintenance.mileage?.toString()
+                        ?: stringResource(Res.string.value_unavailable)
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -483,10 +505,30 @@ private fun MaintenanceItem(maintenance: Maintenance) {
             HorizontalDivider()
 
             Text(
-                text = maintenance.workshopName ?: "Oficina não informada",
+                text = maintenance.workshopName
+                    ?: stringResource(Res.string.vehicle_workshop_not_provided),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun VehicleSearchScreenPreview() {
+    val viewModel = remember {
+        VehicleSearchViewModel(PreviewVehicleRepository).apply {
+            searchVehicle(PreviewVehicle.plate)
+        }
+    }
+
+    VehicleMaintenanceTheme {
+        VehicleSearchScreen(
+            viewModel = viewModel,
+            onNavigateToAddVehicle = {},
+            onNavigateToAddMaintenance = {},
+            onLogout = {}
+        )
     }
 }

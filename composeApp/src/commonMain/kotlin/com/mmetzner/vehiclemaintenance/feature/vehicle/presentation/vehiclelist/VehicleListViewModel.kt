@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import vehiclemaintenance.composeapp.generated.resources.*
 
 class VehicleListViewModel(
     private val repository: VehicleRepository
@@ -39,7 +40,7 @@ class VehicleListViewModel(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = e.message ?: "Could not load your vehicles."
+                        errorMessage = Res.string.error_load_vehicles
                     )
                 }
             }

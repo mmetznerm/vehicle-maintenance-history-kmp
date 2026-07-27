@@ -15,6 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import vehiclemaintenance.composeapp.generated.resources.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VehicleListViewModelTest {
@@ -34,7 +35,7 @@ class VehicleListViewModelTest {
     }
 
     @Test
-    fun `quando existe lista local deve mostrar veiculos do cache`() = runTest {
+    fun `shows vehicles from local cache`() = runTest {
         repository.databaseListFlow.value = listOf(
             Vehicle("ABC1234", "Civic", "Honda", 2022, emptyList())
         )
@@ -49,15 +50,18 @@ class VehicleListViewModelTest {
     }
 
     @Test
-    fun `quando sync falha sem cache deve mostrar erro e lista vazia`() = runTest {
+    fun `shows error and empty list when sync fails without cache`() = runTest {
         repository.databaseListFlow.value = emptyList()
-        repository.networkResult = Result.failure(Exception("Sem internet"))
+        repository.networkResult = Result.failure(Exception("No internet"))
 
         val viewModel = VehicleListViewModel(repository)
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.isLoading)
         assertTrue(viewModel.state.value.vehicles.isEmpty())
-        assertTrue(viewModel.state.value.errorMessage?.contains("offline") == true)
+        assertEquals(
+            Res.string.error_vehicle_offline_no_cache,
+            viewModel.state.value.errorMessage
+        )
     }
 }

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import vehiclemaintenance.composeapp.generated.resources.*
 
 class LoginViewModel(
     private val authRepository: AuthRepository
@@ -43,7 +44,7 @@ class LoginViewModel(
         val password = currentState.password
 
         if (email.isBlank() || password.isBlank()) {
-            _state.update { it.copy(errorMessage = "Email and password are required.") }
+            _state.update { it.copy(errorMessage = Res.string.error_login_required) }
             return
         }
 

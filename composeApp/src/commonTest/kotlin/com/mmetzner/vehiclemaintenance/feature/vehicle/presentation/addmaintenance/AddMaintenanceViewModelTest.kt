@@ -15,6 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import vehiclemaintenance.composeapp.generated.resources.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AddMaintenanceViewModelTest {
@@ -36,12 +37,12 @@ class AddMaintenanceViewModelTest {
     }
 
     @Test
-    fun `quando dados sao validos deve salvar manutencao local para sincronizar depois`() = runTest {
+    fun `saves valid maintenance locally for later synchronization`() = runTest {
         viewModel.onEvent(AddMaintenanceEvent.SetPlate("ABC1234"))
         viewModel.onEvent(AddMaintenanceEvent.UpdateDate("2026-07-11"))
         viewModel.onEvent(AddMaintenanceEvent.UpdateMileage("46000"))
         viewModel.onEvent(AddMaintenanceEvent.UpdateValue("300,50"))
-        viewModel.onEvent(AddMaintenanceEvent.UpdateDescription("Revisao"))
+        viewModel.onEvent(AddMaintenanceEvent.UpdateDescription("Inspection"))
 
         viewModel.onEvent(AddMaintenanceEvent.Save)
         advanceUntilIdle()
@@ -49,7 +50,7 @@ class AddMaintenanceViewModelTest {
         val maintenance = repository.addedMaintenance
         assertEquals("ABC1234", repository.addedMaintenanceVehiclePlate)
         assertEquals("2026-07-11", maintenance?.date)
-        assertEquals("Revisao", maintenance?.description)
+        assertEquals("Inspection", maintenance?.description)
         assertEquals(46000, maintenance?.mileage)
         assertEquals(300.50, maintenance?.totalValue)
         assertNull(maintenance?.workshopName)
@@ -59,7 +60,7 @@ class AddMaintenanceViewModelTest {
     }
 
     @Test
-    fun `quando descricao esta em branco nao deve salvar`() = runTest {
+    fun `does not save when description is blank`() = runTest {
         viewModel.onEvent(AddMaintenanceEvent.SetPlate("ABC1234"))
         viewModel.onEvent(AddMaintenanceEvent.UpdateDate("2026-07-11"))
         viewModel.onEvent(AddMaintenanceEvent.UpdateMileage("46000"))
@@ -69,6 +70,9 @@ class AddMaintenanceViewModelTest {
         advanceUntilIdle()
 
         assertNull(repository.addedMaintenance)
-        assertEquals("Informe a descricao do servico.", viewModel.state.value.error)
+        assertEquals(
+            Res.string.error_maintenance_description_required,
+            viewModel.state.value.error
+        )
     }
 }

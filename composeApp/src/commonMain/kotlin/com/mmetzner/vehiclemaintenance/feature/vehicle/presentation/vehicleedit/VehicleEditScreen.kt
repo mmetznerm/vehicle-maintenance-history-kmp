@@ -54,7 +54,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewVehicleId
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewVehicleRepository
+import com.mmetzner.vehiclemaintenance.core.ui.theme.VehicleMaintenanceTheme
+import org.jetbrains.compose.resources.stringResource
+import vehiclemaintenance.composeapp.generated.resources.*
 
 private val EditBlue = Color(0xFF0B5CFF)
 private val EditBackgroundTop = Color(0xFFF7FAFF)
@@ -90,8 +96,8 @@ fun VehicleEditScreen(
     if (showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text("Excluir veiculo") },
-            text = { Text("Este veiculo sera removido do app agora e sincronizado com o backend quando houver conexao.") },
+            title = { Text(stringResource(Res.string.vehicle_delete_dialog_title)) },
+            text = { Text(stringResource(Res.string.vehicle_delete_dialog_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -99,12 +105,12 @@ fun VehicleEditScreen(
                         viewModel.delete()
                     }
                 ) {
-                    Text("Excluir", color = EditDanger)
+                    Text(stringResource(Res.string.action_delete), color = EditDanger)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("Cancelar")
+                Text(stringResource(Res.string.action_cancel))
                 }
             }
         )
@@ -167,12 +173,13 @@ fun VehicleEditScreen(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Text(
-                                    text = state.errorMessage ?: "Veiculo nao encontrado.",
+                                    text = state.errorMessage?.let { stringResource(it) }
+                                        ?: stringResource(Res.string.vehicle_not_found),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.error
                                 )
                                 OutlinedButton(onClick = onBack) {
-                                    Text("Voltar")
+                                Text(stringResource(Res.string.action_back))
                                 }
                             }
                         }
@@ -214,7 +221,7 @@ private fun VehicleEditHeader(
         IconButton(onClick = onBack) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar",
+            contentDescription = stringResource(Res.string.action_back),
                 tint = Color(0xFF111827)
             )
         }
@@ -226,7 +233,7 @@ private fun VehicleEditHeader(
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "Editar veiculo",
+            text = stringResource(Res.string.vehicle_edit_title),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF111827)
@@ -249,11 +256,11 @@ private fun VehicleEditForm(
         modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        VehicleEditFieldGroup(label = "PLACA") {
+        VehicleEditFieldGroup(label = stringResource(Res.string.field_plate_number)) {
             VehicleEditTextField(
                 value = state.plate,
                 onValueChange = onPlateChanged,
-                placeholder = "ABC-1234",
+                placeholder = stringResource(Res.string.placeholder_plate),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Characters,
                     imeAction = ImeAction.Next
@@ -261,27 +268,27 @@ private fun VehicleEditForm(
             )
         }
 
-        VehicleEditFieldGroup(label = "MARCA") {
+        VehicleEditFieldGroup(label = stringResource(Res.string.field_brand)) {
             VehicleEditTextField(
                 value = state.brand,
                 onValueChange = onBrandChanged,
-                placeholder = "Toyota"
+                placeholder = stringResource(Res.string.placeholder_brand_edit)
             )
         }
 
-        VehicleEditFieldGroup(label = "MODELO") {
+        VehicleEditFieldGroup(label = stringResource(Res.string.field_model)) {
             VehicleEditTextField(
                 value = state.model,
                 onValueChange = onModelChanged,
-                placeholder = "Corolla"
+                placeholder = stringResource(Res.string.placeholder_model_edit)
             )
         }
 
-        VehicleEditFieldGroup(label = "ANO") {
+        VehicleEditFieldGroup(label = stringResource(Res.string.field_year)) {
             VehicleEditTextField(
                 value = state.year,
                 onValueChange = onYearChanged,
-                placeholder = "2024",
+                placeholder = stringResource(Res.string.placeholder_year),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Next
@@ -289,18 +296,18 @@ private fun VehicleEditForm(
             )
         }
 
-        VehicleEditFieldGroup(label = "COR") {
+        VehicleEditFieldGroup(label = stringResource(Res.string.field_color)) {
             VehicleEditTextField(
                 value = state.color,
                 onValueChange = onColorChanged,
-                placeholder = "Prata"
+                placeholder = stringResource(Res.string.placeholder_color_edit)
             )
         }
 
         val errorMessage = state.errorMessage
         if (errorMessage != null) {
             Text(
-                text = errorMessage,
+                text = stringResource(errorMessage),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.fillMaxWidth()
@@ -328,7 +335,7 @@ private fun VehicleEditForm(
             } else {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Salvar alteracoes", fontWeight = FontWeight.Bold)
+                Text(stringResource(Res.string.action_save_changes), fontWeight = FontWeight.Bold)
             }
         }
 
@@ -351,7 +358,7 @@ private fun VehicleEditForm(
             } else {
                 Icon(Icons.Default.Delete, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Excluir veiculo", fontWeight = FontWeight.Bold)
+                Text(stringResource(Res.string.action_delete_vehicle), fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -404,4 +411,23 @@ private fun VehicleEditTextField(
             cursorColor = EditBlue
         )
     )
+}
+
+@Preview
+@Composable
+private fun VehicleEditScreenPreview() {
+    val viewModel = remember {
+        VehicleEditViewModel(PreviewVehicleRepository).apply {
+            load(PreviewVehicleId)
+        }
+    }
+
+    VehicleMaintenanceTheme {
+        VehicleEditScreen(
+            viewModel = viewModel,
+            vehicleId = PreviewVehicleId,
+            onBack = {},
+            onDeleted = {}
+        )
+    }
 }

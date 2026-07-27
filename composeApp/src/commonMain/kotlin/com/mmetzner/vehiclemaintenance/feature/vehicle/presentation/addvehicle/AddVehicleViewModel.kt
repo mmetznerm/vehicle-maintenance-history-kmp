@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import vehiclemaintenance.composeapp.generated.resources.*
 
 class AddVehicleViewModel(
     private val repository: VehicleRepository
@@ -25,13 +27,13 @@ class AddVehicleViewModel(
 
     fun saveVehicle(plate: String, model: String, brand: String, yearStr: String, color: String) {
         if (plate.isBlank() || model.isBlank() || brand.isBlank()) {
-            _state.update { it.copy(error = "Placa, marca e modelo são obrigatórios.") }
+            _state.update { it.copy(error = Res.string.error_vehicle_required_fields) }
             return
         }
 
         val year = yearStr.toIntOrNull()
         if (year == null) {
-            _state.update { it.copy(error = "Informe um ano válido.") }
+            _state.update { it.copy(error = Res.string.error_invalid_year) }
             return
         }
 
@@ -56,7 +58,7 @@ class AddVehicleViewModel(
                 _state.update {
                     it.copy(
                         isSaving = false,
-                        error = e.message ?: "Não foi possível salvar o veículo."
+                        error = Res.string.error_save_vehicle
                     )
                 }
             }
@@ -66,11 +68,10 @@ class AddVehicleViewModel(
 
 data class AddVehicleState(
     val isSaving: Boolean = false,
-    val error: String? = null
+    val error: StringResource? = null
 )
 
 sealed interface AddVehicleUiEvent {
     data object NavigateBack : AddVehicleUiEvent
 }
-
 

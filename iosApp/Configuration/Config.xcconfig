@@ -1,6 +1,6 @@
 TEAM_ID=
 
-PRODUCT_NAME=VehicleMaintenance
+PRODUCT_NAME=Vehicle History
 PRODUCT_BUNDLE_IDENTIFIER=com.mmetzner.vehiclemaintenance.VehicleMaintenance$(TEAM_ID)
 
 CURRENT_PROJECT_VERSION=1

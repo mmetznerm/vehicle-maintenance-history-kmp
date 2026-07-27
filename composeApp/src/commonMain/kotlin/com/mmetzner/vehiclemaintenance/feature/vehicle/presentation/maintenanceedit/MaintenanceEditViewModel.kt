@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import vehiclemaintenance.composeapp.generated.resources.*
 
 class MaintenanceEditViewModel(
     private val repository: VehicleRepository
@@ -70,7 +72,7 @@ class MaintenanceEditViewModel(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = e.message ?: "Could not load maintenance."
+                        errorMessage = Res.string.error_load_maintenance
                     )
                 }
             }
@@ -113,7 +115,7 @@ class MaintenanceEditViewModel(
         val maintenance = current.maintenance
 
         if (vehicle == null || maintenance == null) {
-            _state.update { it.copy(errorMessage = "Manutencao nao encontrada.") }
+            _state.update { it.copy(errorMessage = Res.string.maintenance_not_found) }
             return
         }
 
@@ -146,7 +148,7 @@ class MaintenanceEditViewModel(
                 _state.update {
                     it.copy(
                         isSaving = false,
-                        errorMessage = e.message ?: "Nao foi possivel salvar a manutencao."
+                        errorMessage = Res.string.error_save_maintenance
                     )
                 }
             }
@@ -158,7 +160,7 @@ class MaintenanceEditViewModel(
         val maintenance = state.value.maintenance
 
         if (vehicle == null || maintenance == null) {
-            _state.update { it.copy(errorMessage = "Manutencao nao encontrada.") }
+            _state.update { it.copy(errorMessage = Res.string.maintenance_not_found) }
             return
         }
 
@@ -178,7 +180,7 @@ class MaintenanceEditViewModel(
                 _state.update {
                     it.copy(
                         isDeleting = false,
-                        errorMessage = e.message ?: "Nao foi possivel excluir a manutencao."
+                        errorMessage = Res.string.error_delete_maintenance
                     )
                 }
             }
@@ -192,7 +194,7 @@ data class MaintenanceEditState(
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val isDeleting: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: StringResource? = null,
     val description: String = "",
     val date: String = "",
     val mileage: String = "",
@@ -211,18 +213,18 @@ private fun String.toCurrencyDoubleOrNull(): Double? {
         .toDoubleOrNull()
 }
 
-private fun validateMaintenance(state: MaintenanceEditState): String? {
+private fun validateMaintenance(state: MaintenanceEditState): StringResource? {
     val mileage = state.mileage.toIntOrNull()
     val totalValue = state.totalValue.toCurrencyDoubleOrNull()
 
     return when {
-        state.date.isBlank() -> "Informe a data da manutencao."
-        state.mileage.isBlank() -> "Informe o odometro."
-        mileage == null || mileage < 0 -> "Informe um odometro valido."
-        state.totalValue.isBlank() -> "Informe o custo total."
-        totalValue == null || totalValue < 0.0 -> "Informe um custo valido."
-        state.description.isBlank() -> "Informe a descricao do servico."
-        state.description.trim().length > 500 -> "Use no maximo 500 caracteres."
+        state.date.isBlank() -> Res.string.error_maintenance_date_required
+        state.mileage.isBlank() -> Res.string.error_maintenance_odometer_required
+        mileage == null || mileage < 0 -> Res.string.error_maintenance_odometer_invalid
+        state.totalValue.isBlank() -> Res.string.error_maintenance_cost_required
+        totalValue == null || totalValue < 0.0 -> Res.string.error_maintenance_cost_invalid
+        state.description.isBlank() -> Res.string.error_maintenance_description_required
+        state.description.trim().length > 500 -> Res.string.error_maintenance_description_too_long
         else -> null
     }
 }

@@ -27,7 +27,7 @@ class AddVehicleViewModelTest {
     }
 
     @Test
-    fun `quando os dados sao validos deve salvar no repositorio e emitir evento de voltar`() = runTest {
+    fun `saves valid data and emits back navigation event`() = runTest {
         val emittedEvents = mutableListOf<AddVehicleUiEvent>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiEvent.collect { event ->
@@ -40,22 +40,22 @@ class AddVehicleViewModelTest {
             model = "Civic",
             brand = "Honda",
             yearStr = "2022",
-            color = "Prata"
+            color = "Silver"
         )
         advanceUntilIdle()
 
-        assertNotNull(repository.addedVehicle, "O veículo deveria ter sido enviado ao repositório")
+        assertNotNull(repository.addedVehicle, "The vehicle should have been sent to the repository")
         assertEquals("ABC1234", repository.addedVehicle?.plate)
         assertEquals("Civic", repository.addedVehicle?.model)
         assertEquals(2022, repository.addedVehicle?.year)
-        assertEquals("Prata", repository.addedVehicle?.color)
+        assertEquals("Silver", repository.addedVehicle?.color)
         assertEquals(1, emittedEvents.size)
         assertTrue(emittedEvents.first() is AddVehicleUiEvent.NavigateBack)
         job.cancel()
     }
 
     @Test
-    fun `quando a placa esta em branco NAO deve salvar e NAO deve emitir evento`() = runTest {
+    fun `does not save or emit event when plate number is blank`() = runTest {
         val emittedEvents = mutableListOf<AddVehicleUiEvent>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiEvent.collect { emittedEvents.add(it) }
@@ -64,13 +64,13 @@ class AddVehicleViewModelTest {
         viewModel.saveVehicle(plate = "   ", model = "Civic", brand = "Honda", yearStr = "2022", color = "")
         advanceUntilIdle()
 
-        assertNull(repository.addedVehicle, "Não deve salvar se a placa for inválida")
-        assertTrue(emittedEvents.isEmpty(), "Não deve fechar a tela se houve erro de validação")
+        assertNull(repository.addedVehicle, "Should not save when the plate number is invalid")
+        assertTrue(emittedEvents.isEmpty(), "Should not close the screen after a validation error")
         job.cancel()
     }
 
     @Test
-    fun `quando o ano for invalido NAO deve salvar e NAO deve emitir evento`() = runTest {
+    fun `does not save or emit event when year is invalid`() = runTest {
         val emittedEvents = mutableListOf<AddVehicleUiEvent>()
         val job = launch(UnconfinedTestDispatcher(testScheduler)) {
             viewModel.uiEvent.collect { emittedEvents.add(it) }
@@ -80,7 +80,7 @@ class AddVehicleViewModelTest {
             plate = "ABC1234",
             model = "Civic",
             brand = "Honda",
-            yearStr = "Dois Mil e Vinte",
+            yearStr = "Two Thousand Twenty",
             color = ""
         )
         advanceUntilIdle()

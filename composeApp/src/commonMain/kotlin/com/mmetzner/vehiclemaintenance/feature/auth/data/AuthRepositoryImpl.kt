@@ -4,6 +4,7 @@ import com.mmetzner.vehiclemaintenance.core.auth.AuthTokenStore
 import com.mmetzner.vehiclemaintenance.core.auth.AuthTokens
 import com.mmetzner.vehiclemaintenance.feature.auth.data.remote.AuthRemoteDataSource
 import com.mmetzner.vehiclemaintenance.feature.auth.domain.repository.AuthRepository
+import kotlinx.coroutines.CancellationException
 
 class AuthRepositoryImpl(
     private val remoteDataSource: AuthRemoteDataSource,
@@ -53,6 +54,18 @@ class AuthRepositoryImpl(
     }
 
     override suspend fun logout() {
-        tokenStore.clear()
+        val refreshToken = tokenStore.getTokens()?.refreshToken
+
+        try {
+            if (!refreshToken.isNullOrBlank()) {
+                remoteDataSource.logout(refreshToken)
+            }
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (_: Exception) {
+            // Local sign-out must still succeed when the server is unavailable.
+        } finally {
+            tokenStore.clear()
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.mmetzner.vehiclemaintenance.core.network
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import vehiclemaintenance.composeapp.generated.resources.*
 
 class NetworkErrorMessagesTest {
 
@@ -13,7 +14,7 @@ class NetworkErrorMessagesTest {
             operation = "Login"
         )
 
-        assertEquals("Invalid email or password.", error.toLoginErrorMessage())
+        assertEquals(Res.string.error_invalid_credentials, error.toLoginErrorMessage())
     }
 
     @Test
@@ -21,7 +22,7 @@ class NetworkErrorMessagesTest {
         val error = Exception("Network unavailable")
 
         assertEquals(
-            "Could not connect to the server. Check your connection and try again.",
+            Res.string.error_server_connection,
             error.toLoginErrorMessage()
         )
     }
@@ -35,7 +36,7 @@ class NetworkErrorMessagesTest {
         )
 
         assertEquals(
-            "Vehicle not found and no local copy is available.",
+            Res.string.error_vehicle_not_found_no_cache,
             error.toVehicleSearchErrorMessage()
         )
     }
@@ -45,7 +46,7 @@ class NetworkErrorMessagesTest {
         val error = Exception("Network unavailable")
 
         assertEquals(
-            "You are offline and this vehicle is not available in the local cache.",
+            Res.string.error_vehicle_offline_no_cache,
             error.toVehicleSearchErrorMessage()
         )
     }

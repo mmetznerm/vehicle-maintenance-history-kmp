@@ -11,8 +11,10 @@ import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import vehiclemaintenance.composeapp.generated.resources.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RegisterViewModelTest {
@@ -40,7 +42,7 @@ class RegisterViewModelTest {
 
         assertFalse(repository.createAccountCalled)
         assertFalse(viewModel.state.value.isAuthenticated)
-        assertTrue(viewModel.state.value.errorMessage?.contains("required") == true)
+        assertEquals(Res.string.error_register_required, viewModel.state.value.errorMessage)
     }
 
     @Test
@@ -53,7 +55,7 @@ class RegisterViewModelTest {
         advanceUntilIdle()
 
         assertFalse(repository.createAccountCalled)
-        assertTrue(viewModel.state.value.errorMessage?.contains("at least 8") == true)
+        assertEquals(Res.string.error_password_too_short, viewModel.state.value.errorMessage)
     }
 
     @Test

@@ -53,7 +53,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewMaintenanceId
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewVehicleId
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewVehicleRepository
+import com.mmetzner.vehiclemaintenance.core.ui.theme.VehicleMaintenanceTheme
+import org.jetbrains.compose.resources.stringResource
+import vehiclemaintenance.composeapp.generated.resources.*
 
 private val MaintenanceEditBlue = Color(0xFF0B5CFF)
 private val MaintenanceEditBackground = Color(0xFFF7F8FA)
@@ -87,8 +94,8 @@ fun MaintenanceEditScreen(
     if (showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirmation = false },
-            title = { Text("Excluir manutencao") },
-            text = { Text("A manutencao sera removida do app agora e sincronizada com o backend quando houver conexao.") },
+            title = { Text(stringResource(Res.string.maintenance_delete_dialog_title)) },
+            text = { Text(stringResource(Res.string.maintenance_delete_dialog_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -96,12 +103,12 @@ fun MaintenanceEditScreen(
                         viewModel.delete()
                     }
                 ) {
-                    Text("Excluir", color = MaintenanceEditDanger)
+                    Text(stringResource(Res.string.action_delete), color = MaintenanceEditDanger)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirmation = false }) {
-                    Text("Cancelar")
+                Text(stringResource(Res.string.action_cancel))
                 }
             }
         )
@@ -146,13 +153,14 @@ fun MaintenanceEditScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = state.errorMessage ?: "Manutencao nao encontrada.",
+                                text = state.errorMessage?.let { stringResource(it) }
+                                    ?: stringResource(Res.string.maintenance_not_found),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.error,
                                 textAlign = TextAlign.Center
                             )
                             OutlinedButton(onClick = onBack) {
-                                Text("Voltar")
+                            Text(stringResource(Res.string.action_back))
                             }
                         }
                     }
@@ -191,12 +199,12 @@ private fun MaintenanceEditTopBar(onBack: () -> Unit) {
         IconButton(onClick = onBack) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Voltar",
+            contentDescription = stringResource(Res.string.action_back),
                 tint = Color(0xFF111827)
             )
         }
         Text(
-            text = "Editar manutencao",
+            text = stringResource(Res.string.maintenance_edit_title),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Black,
             color = Color(0xFF111827)
@@ -218,22 +226,22 @@ private fun MaintenanceEditForm(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        MaintenanceEditFieldGroup(label = "DATA DA MANUTENCAO") {
+        MaintenanceEditFieldGroup(label = stringResource(Res.string.maintenance_field_date)) {
             MaintenanceEditTextField(
                 value = state.date,
                 onValueChange = onDateChanged,
-                placeholder = "2026-07-11",
+                placeholder = stringResource(Res.string.maintenance_date_placeholder),
                 trailingIcon = {
                     Icon(Icons.Default.CalendarMonth, contentDescription = null)
                 }
             )
         }
 
-        MaintenanceEditFieldGroup(label = "ODOMETRO") {
+        MaintenanceEditFieldGroup(label = stringResource(Res.string.maintenance_field_odometer)) {
             MaintenanceEditTextField(
                 value = state.mileage,
                 onValueChange = onMileageChanged,
-                placeholder = "45200",
+                placeholder = stringResource(Res.string.maintenance_odometer_edit_placeholder),
                 trailingIcon = {
                     Icon(Icons.Default.Speed, contentDescription = null)
                 },
@@ -244,11 +252,11 @@ private fun MaintenanceEditForm(
             )
         }
 
-        MaintenanceEditFieldGroup(label = "CUSTO TOTAL") {
+        MaintenanceEditFieldGroup(label = stringResource(Res.string.maintenance_field_total_cost)) {
             MaintenanceEditTextField(
                 value = state.totalValue,
                 onValueChange = onTotalValueChanged,
-                placeholder = "250,00",
+                placeholder = stringResource(Res.string.maintenance_cost_edit_placeholder),
                 leadingIcon = {
                     Icon(Icons.Default.Payments, contentDescription = null)
                 },
@@ -259,11 +267,11 @@ private fun MaintenanceEditForm(
             )
         }
 
-        MaintenanceEditFieldGroup(label = "DESCRICAO DO SERVICO") {
+        MaintenanceEditFieldGroup(label = stringResource(Res.string.maintenance_field_description)) {
             MaintenanceEditTextField(
                 value = state.description,
                 onValueChange = onDescriptionChanged,
-                placeholder = "Troca de oleo, pastilhas de freio etc.",
+                placeholder = stringResource(Res.string.maintenance_description_placeholder),
                 singleLine = false,
                 minLines = 4,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
@@ -273,7 +281,7 @@ private fun MaintenanceEditForm(
         val errorMessage = state.errorMessage
         if (errorMessage != null) {
             Text(
-                text = errorMessage,
+                text = stringResource(errorMessage),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.fillMaxWidth()
@@ -301,7 +309,7 @@ private fun MaintenanceEditForm(
             } else {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Salvar alteracoes", fontWeight = FontWeight.Bold)
+                Text(stringResource(Res.string.action_save_changes), fontWeight = FontWeight.Bold)
             }
         }
 
@@ -324,7 +332,7 @@ private fun MaintenanceEditForm(
             } else {
                 Icon(Icons.Default.Delete, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Excluir manutencao", fontWeight = FontWeight.Bold)
+                Text(stringResource(Res.string.action_delete_maintenance), fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -383,4 +391,26 @@ private fun MaintenanceEditTextField(
             cursorColor = MaintenanceEditBlue
         )
     )
+}
+
+@Preview
+@Composable
+private fun MaintenanceEditScreenPreview() {
+    val viewModel = remember {
+        MaintenanceEditViewModel(PreviewVehicleRepository).apply {
+            load(
+                vehicleId = PreviewVehicleId,
+                maintenanceId = PreviewMaintenanceId
+            )
+        }
+    }
+
+    VehicleMaintenanceTheme {
+        MaintenanceEditScreen(
+            viewModel = viewModel,
+            vehicleId = PreviewVehicleId,
+            maintenanceId = PreviewMaintenanceId,
+            onBack = {}
+        )
+    }
 }

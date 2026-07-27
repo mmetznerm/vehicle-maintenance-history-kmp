@@ -19,18 +19,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -52,7 +45,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mmetzner.vehiclemaintenance.core.ui.branding.VehicleHistoryMark
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewVehicleRepository
+import com.mmetzner.vehiclemaintenance.core.ui.theme.VehicleMaintenanceTheme
+import org.jetbrains.compose.resources.stringResource
+import vehiclemaintenance.composeapp.generated.resources.*
 
 private val VehicleFormBlue = Color(0xFF0B5CFF)
 private val VehicleFormBackgroundTop = Color(0xFFF7FAFF)
@@ -123,11 +122,11 @@ fun AddVehicleScreen(
                         modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        VehicleFormFieldGroup(label = "PLATE NUMBER") {
+                        VehicleFormFieldGroup(label = stringResource(Res.string.field_plate_number)) {
                             VehicleFormTextField(
                                 value = plate,
                                 onValueChange = { plate = it.uppercase().trim() },
-                                placeholder = "ABC-1234",
+                                placeholder = stringResource(Res.string.placeholder_plate),
                                 keyboardOptions = KeyboardOptions(
                                     capitalization = KeyboardCapitalization.Characters,
                                     imeAction = ImeAction.Next
@@ -135,28 +134,27 @@ fun AddVehicleScreen(
                             )
                         }
 
-                        VehicleFormFieldGroup(label = "BRAND") {
-                            VehicleFormDropdown(
+                        VehicleFormFieldGroup(label = stringResource(Res.string.field_brand)) {
+                            VehicleFormTextField(
                                 value = brand,
-                                placeholder = "Select Brand",
-                                options = listOf("Toyota", "Honda", "Ford", "Chevrolet", "Volkswagen", "Fiat"),
-                                onValueChange = { brand = it }
+                                onValueChange = { brand = it },
+                                placeholder = stringResource(Res.string.placeholder_brand)
                             )
                         }
 
-                        VehicleFormFieldGroup(label = "MODEL") {
+                        VehicleFormFieldGroup(label = stringResource(Res.string.field_model)) {
                             VehicleFormTextField(
                                 value = model,
                                 onValueChange = { model = it },
-                                placeholder = "e.g. Model S Plaid"
+                                placeholder = stringResource(Res.string.placeholder_model)
                             )
                         }
 
-                        VehicleFormFieldGroup(label = "YEAR") {
+                        VehicleFormFieldGroup(label = stringResource(Res.string.field_year)) {
                             VehicleFormTextField(
                                 value = year,
                                 onValueChange = { year = it.filter(Char::isDigit).take(4) },
-                                placeholder = "2024",
+                                placeholder = stringResource(Res.string.placeholder_year),
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Number,
                                     imeAction = ImeAction.Next
@@ -164,18 +162,18 @@ fun AddVehicleScreen(
                             )
                         }
 
-                        VehicleFormFieldGroup(label = "COLOR") {
+                        VehicleFormFieldGroup(label = stringResource(Res.string.field_color)) {
                             VehicleFormTextField(
                                 value = color,
                                 onValueChange = { color = it },
-                                placeholder = "e.g. Midnight Silver"
+                                placeholder = stringResource(Res.string.placeholder_color)
                             )
                         }
 
                         val errorMessage = state.error
                         if (errorMessage != null) {
                             Text(
-                                text = errorMessage,
+                                text = stringResource(errorMessage),
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.fillMaxWidth()
@@ -206,7 +204,7 @@ fun AddVehicleScreen(
                                 )
                             } else {
                                 Text(
-                                    text = "Save Vehicle",
+                                    text = stringResource(Res.string.action_save_vehicle),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -225,15 +223,13 @@ private fun VehicleFormBrandHeader(modifier: Modifier = Modifier) {
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Default.DirectionsCar,
-            contentDescription = null,
-            tint = VehicleFormBlue,
-            modifier = Modifier.size(22.dp)
+        VehicleHistoryMark(
+            modifier = Modifier.size(32.dp),
+            elevation = 4.dp
         )
-        Spacer(modifier = Modifier.width(6.dp))
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
-            text = "AutoLog",
+            text = stringResource(Res.string.app_name),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = VehicleFormBlue
@@ -308,46 +304,15 @@ private fun VehicleFormTextField(
     )
 }
 
+@Preview
 @Composable
-private fun VehicleFormDropdown(
-    value: String,
-    placeholder: String,
-    options: List<String>,
-    onValueChange: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
+private fun AddVehicleScreenPreview() {
+    val viewModel = remember { AddVehicleViewModel(PreviewVehicleRepository) }
 
-    Box {
-        VehicleFormTextField(
-            value = value,
-            onValueChange = {},
-            placeholder = placeholder,
-            readOnly = true,
-            trailingIcon = {
-                IconButton(onClick = { expanded = true }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Open options",
-                        tint = VehicleFormMutedText
-                    )
-                }
-            }
+    VehicleMaintenanceTheme {
+        AddVehicleScreen(
+            viewModel = viewModel,
+            onNavigateBack = {}
         )
-
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            options.forEach { option ->
-                DropdownMenuItem(
-                    text = { Text(option) },
-                    onClick = {
-                        onValueChange(option)
-                        expanded = false
-                    }
-                )
-            }
-        }
     }
 }

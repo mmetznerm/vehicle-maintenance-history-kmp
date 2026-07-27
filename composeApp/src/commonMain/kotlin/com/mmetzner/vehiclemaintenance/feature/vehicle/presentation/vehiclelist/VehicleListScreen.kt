@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DirectionsCar
@@ -41,14 +40,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mmetzner.vehiclemaintenance.core.ui.branding.VehicleHistoryMark
+import com.mmetzner.vehiclemaintenance.core.ui.components.LogoutOverflowMenu
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewVehicleRepository
+import com.mmetzner.vehiclemaintenance.core.ui.theme.VehicleMaintenanceTheme
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+import vehiclemaintenance.composeapp.generated.resources.*
 
 private val ListBlue = Color(0xFF0B5CFF)
 private val ListBackground = Color(0xFFF7F8FA)
@@ -129,20 +138,12 @@ private fun VehicleListTopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Surface(
+            VehicleHistoryMark(
                 modifier = Modifier.size(30.dp),
-                shape = CircleShape,
-                color = Color(0xFFE6EEF9),
-                contentColor = ListBlue
-            ) {
-                Icon(
-                    imageVector = Icons.Default.DirectionsCar,
-                    contentDescription = null,
-                    modifier = Modifier.padding(6.dp)
-                )
-            }
+                elevation = 4.dp
+            )
             Text(
-                text = "AutoLog",
+                text = stringResource(Res.string.app_name),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Black,
                 color = ListBlue
@@ -163,18 +164,15 @@ private fun VehicleListTopBar(
                 } else {
                     Icon(
                         imageVector = Icons.Default.Refresh,
-                        contentDescription = "Atualizar",
+                        contentDescription = stringResource(Res.string.action_refresh),
                         tint = ListBlue
                     )
                 }
             }
-            IconButton(onClick = onLogout) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.Logout,
-                    contentDescription = "Sair",
-                    tint = ListBlue
-                )
-            }
+            LogoutOverflowMenu(
+                onLogout = onLogout,
+                iconTint = ListBlue
+            )
         }
     }
 }
@@ -238,13 +236,17 @@ private fun VehicleListHeader(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Veiculos",
+                text = stringResource(Res.string.vehicles_title),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Black,
                 color = Color(0xFF111827)
             )
             Text(
-                text = "$vehicleCount cadastrado${if (vehicleCount == 1) "" else "s"}",
+                text = pluralStringResource(
+                    Res.plurals.registered_vehicle_count,
+                    vehicleCount,
+                    vehicleCount
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = ListMuted
             )
@@ -257,7 +259,7 @@ private fun VehicleListHeader(
         ) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(Modifier.width(6.dp))
-            Text("Adicionar")
+            Text(stringResource(Res.string.action_add))
         }
     }
 }
@@ -301,7 +303,12 @@ private fun VehicleListCard(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "${vehicle.brand} ${vehicle.model}".trim().ifBlank { "Veiculo" },
+                        text = stringResource(
+                            Res.string.vehicle_name,
+                            vehicle.brand,
+                            vehicle.model
+                        ).trim()
+                            .ifBlank { stringResource(Res.string.vehicle_fallback_name) },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF111827),
@@ -336,7 +343,15 @@ private fun VehicleListCard(
                     enabled = vehicle.id != null,
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text(if (vehicle.id == null) "Sincronizando" else "Detalhes")
+                    Text(
+                        stringResource(
+                            if (vehicle.id == null) {
+                                Res.string.vehicle_syncing
+                            } else {
+                                Res.string.action_details
+                            }
+                        )
+                    )
                 }
 
                 Spacer(Modifier.width(8.dp))
@@ -347,7 +362,7 @@ private fun VehicleListCard(
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
-                    Text("Nova manutencao")
+                    Text(stringResource(Res.string.action_new_maintenance))
                 }
             }
         }
@@ -397,7 +412,7 @@ private fun VehicleMeta(
 
 @Composable
 private fun EmptyVehicleListState(
-    errorMessage: String?,
+    errorMessage: StringResource?,
     onRegisterVehicle: () -> Unit,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier
@@ -423,14 +438,21 @@ private fun EmptyVehicleListState(
         }
 
         Text(
-            text = if (errorMessage == null) "Nenhum veiculo cadastrado" else "Nao foi possivel atualizar",
+            text = stringResource(
+                if (errorMessage == null) {
+                    Res.string.vehicle_no_registered
+                } else {
+                    Res.string.vehicle_could_not_refresh
+                }
+            ),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
 
         Text(
-            text = errorMessage ?: "Adicione seu primeiro veiculo para acompanhar o historico de manutencoes.",
+            text = errorMessage?.let { stringResource(it) }
+                ?: stringResource(Res.string.vehicle_empty_description),
             style = MaterialTheme.typography.bodyMedium,
             color = ListMuted,
             textAlign = TextAlign.Center,
@@ -442,7 +464,7 @@ private fun EmptyVehicleListState(
                 FilledTonalButton(onClick = onRetry) {
                     Icon(Icons.Default.Refresh, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
-                    Text("Tentar novamente")
+                    Text(stringResource(Res.string.action_try_again))
                 }
             }
 
@@ -452,7 +474,7 @@ private fun EmptyVehicleListState(
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)
                 Spacer(Modifier.width(6.dp))
-                Text("Adicionar veiculo")
+                Text(stringResource(Res.string.action_add_vehicle))
             }
         }
     }
@@ -460,7 +482,7 @@ private fun EmptyVehicleListState(
 
 @Composable
 private fun InlineErrorCard(
-    message: String,
+    message: StringResource,
     onRetry: () -> Unit
 ) {
     Card(
@@ -479,26 +501,43 @@ private fun InlineErrorCard(
                 tint = MaterialTheme.colorScheme.onErrorContainer
             )
             Text(
-                text = message,
+                text = stringResource(message),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onErrorContainer,
                 modifier = Modifier.weight(1f)
             )
             FilledTonalButton(onClick = onRetry) {
-                Text("Atualizar")
+                Text(stringResource(Res.string.action_refresh))
             }
         }
     }
 }
 
+@Composable
 private fun Vehicle.currentOdometerText(): String {
     val currentOdometer = maintenances
         ?.mapNotNull { it.mileage }
         ?.maxOrNull()
 
     return if (currentOdometer == null) {
-        "Sem odometro"
+        stringResource(Res.string.vehicle_no_odometer_reading)
     } else {
-        "$currentOdometer km"
+        stringResource(Res.string.vehicle_odometer_km_number, currentOdometer)
+    }
+}
+
+@Preview
+@Composable
+private fun VehicleListScreenPreview() {
+    val viewModel = remember { VehicleListViewModel(PreviewVehicleRepository) }
+
+    VehicleMaintenanceTheme {
+        VehicleListScreen(
+            viewModel = viewModel,
+            onRegisterVehicle = {},
+            onOpenVehicle = {},
+            onAddMaintenance = {},
+            onLogout = {}
+        )
     }
 }

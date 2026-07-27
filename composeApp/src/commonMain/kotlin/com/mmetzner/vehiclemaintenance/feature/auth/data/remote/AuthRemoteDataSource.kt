@@ -5,6 +5,7 @@ import com.mmetzner.vehiclemaintenance.core.network.toNetworkRequestException
 import com.mmetzner.vehiclemaintenance.feature.auth.data.remote.dto.CreateAccountRequest
 import com.mmetzner.vehiclemaintenance.feature.auth.data.remote.dto.LoginRequest
 import com.mmetzner.vehiclemaintenance.feature.auth.data.remote.dto.LoginResponse
+import com.mmetzner.vehiclemaintenance.feature.auth.data.remote.dto.LogoutRequest
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.post
@@ -20,7 +21,7 @@ class AuthRemoteDataSource(
     suspend fun login(email: String, password: String): LoginResponse {
         val response = httpClient.post("${apiConfig.normalizedBaseUrl}/v1/auth/login") {
             contentType(ContentType.Application.Json)
-            setBody(LoginRequest(email = email, password = password))
+            setBody(LoginRequest(emailOrPhone = email, password = password))
         }
 
         if (!response.status.isSuccess()) {
@@ -51,5 +52,16 @@ class AuthRemoteDataSource(
         }
 
         return response.body()
+    }
+
+    suspend fun logout(refreshToken: String) {
+        val response = httpClient.post("${apiConfig.normalizedBaseUrl}/v1/auth/logout") {
+            contentType(ContentType.Application.Json)
+            setBody(LogoutRequest(refreshToken = refreshToken))
+        }
+
+        if (!response.status.isSuccess()) {
+            throw response.status.toNetworkRequestException("Logout")
+        }
     }
 }

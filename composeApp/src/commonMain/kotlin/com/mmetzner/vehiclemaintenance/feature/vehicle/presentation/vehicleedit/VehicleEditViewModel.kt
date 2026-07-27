@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import vehiclemaintenance.composeapp.generated.resources.*
 
 class VehicleEditViewModel(
     private val repository: VehicleRepository
@@ -64,7 +66,7 @@ class VehicleEditViewModel(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        errorMessage = e.message ?: "Could not load vehicle."
+                        errorMessage = Res.string.error_load_vehicle
                     )
                 }
             }
@@ -110,18 +112,18 @@ class VehicleEditViewModel(
         val vehicle = current.vehicle
 
         if (vehicle == null) {
-            _state.update { it.copy(errorMessage = "Veiculo nao encontrado.") }
+            _state.update { it.copy(errorMessage = Res.string.vehicle_not_found) }
             return
         }
 
         if (current.plate.isBlank() || current.brand.isBlank() || current.model.isBlank()) {
-            _state.update { it.copy(errorMessage = "Placa, marca e modelo sao obrigatorios.") }
+            _state.update { it.copy(errorMessage = Res.string.error_vehicle_required_fields) }
             return
         }
 
         val year = current.year.toIntOrNull()
         if (year == null) {
-            _state.update { it.copy(errorMessage = "Informe um ano valido.") }
+            _state.update { it.copy(errorMessage = Res.string.error_invalid_year) }
             return
         }
 
@@ -146,7 +148,7 @@ class VehicleEditViewModel(
                 _state.update {
                     it.copy(
                         isSaving = false,
-                        errorMessage = e.message ?: "Nao foi possivel salvar o veiculo."
+                        errorMessage = Res.string.error_save_vehicle
                     )
                 }
             }
@@ -157,7 +159,7 @@ class VehicleEditViewModel(
         val vehicle = state.value.vehicle
 
         if (vehicle == null) {
-            _state.update { it.copy(errorMessage = "Veiculo nao encontrado.") }
+            _state.update { it.copy(errorMessage = Res.string.vehicle_not_found) }
             return
         }
 
@@ -172,7 +174,7 @@ class VehicleEditViewModel(
                 _state.update {
                     it.copy(
                         isDeleting = false,
-                        errorMessage = e.message ?: "Nao foi possivel excluir o veiculo."
+                        errorMessage = Res.string.error_delete_vehicle
                     )
                 }
             }
@@ -185,7 +187,7 @@ data class VehicleEditState(
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val isDeleting: Boolean = false,
-    val errorMessage: String? = null,
+    val errorMessage: StringResource? = null,
     val plate: String = "",
     val brand: String = "",
     val model: String = "",

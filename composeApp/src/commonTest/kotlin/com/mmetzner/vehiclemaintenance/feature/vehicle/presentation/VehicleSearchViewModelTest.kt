@@ -16,6 +16,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import vehiclemaintenance.composeapp.generated.resources.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class VehicleSearchViewModelTest {
@@ -37,29 +38,32 @@ class VehicleSearchViewModelTest {
     }
 
     @Test
-    fun `quando tem cache deve mostrar Sucesso mesmo se a rede falhar`() = runTest {
+    fun `shows cached vehicle when network sync fails`() = runTest {
         val cachedVehicle = Vehicle("ABC1234", "Civic", "Honda", 2022, emptyList())
-        repository.databaseFlow.value = cachedVehicle // Banco tem dado
-        repository.networkResult = Result.failure(Exception("Sem internet"))
+        repository.databaseFlow.value = cachedVehicle // Cache contains data
+        repository.networkResult = Result.failure(Exception("No internet"))
 
         viewModel.searchVehicle("ABC1234")
         advanceUntilIdle()
 
-        assertTrue(repository.syncCalled, "O sync deve ser tentado sempre")
+        assertTrue(repository.syncCalled, "Sync should always be attempted")
         assertTrue(viewModel.state.value is VehicleSearchState.Success)
         assertEquals("Civic", (viewModel.state.value as VehicleSearchState.Success).vehicle.model)
     }
 
     @Test
-    fun `quando NAO tem cache e a rede falha deve mostrar Erro`() = runTest {
+    fun `shows error when network fails and cache is empty`() = runTest {
         repository.databaseFlow.value = null
-        repository.networkResult = Result.failure(Exception("Sem internet"))
+        repository.networkResult = Result.failure(Exception("No internet"))
 
         viewModel.searchVehicle("XYZ9999")
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value is VehicleSearchState.Error)
-        assertTrue((viewModel.state.value as VehicleSearchState.Error).message.contains("offline"))
+        assertEquals(
+            Res.string.error_vehicle_offline_no_cache,
+            (viewModel.state.value as VehicleSearchState.Error).message
+        )
     }
 }
 

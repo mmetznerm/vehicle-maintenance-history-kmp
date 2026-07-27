@@ -22,7 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.History
@@ -45,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,12 +55,18 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.mmetzner.vehiclemaintenance.core.ui.branding.VehicleHistoryMark
+import com.mmetzner.vehiclemaintenance.core.ui.components.LogoutOverflowMenu
+import com.mmetzner.vehiclemaintenance.core.ui.preview.PreviewVehicleRepository
+import com.mmetzner.vehiclemaintenance.core.ui.theme.VehicleMaintenanceTheme
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
-import vehiclemaintenance.composeapp.generated.resources.Res
-import vehiclemaintenance.composeapp.generated.resources.car_hero
+import org.jetbrains.compose.resources.stringResource
+import vehiclemaintenance.composeapp.generated.resources.*
 
 private val HomeBlue = Color(0xFF0B5CFF)
 private val HomeBackground = Color(0xFFF7F8FA)
@@ -110,6 +116,16 @@ fun VehicleHomeScreen(
                 }
 
                 is VehicleHomeState.Content -> {
+                    val vehicle = currentState.vehicle
+                    val shareMessage = stringResource(
+                        Res.string.home_share_message,
+                        vehicle.year,
+                        vehicle.brand,
+                        vehicle.model,
+                        vehicle.plate,
+                        vehicle.maintenances?.size ?: 0
+                    )
+
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -120,33 +136,23 @@ fun VehicleHomeScreen(
                         HomeTopBar(onLogout = onLogout)
 
                         VehicleHeroCard(
-                            vehicle = currentState.vehicle,
-                            onAddMaintenance = { onAddMaintenance(currentState.vehicle.plate) },
+                            vehicle = vehicle,
+                            onAddMaintenance = { onAddMaintenance(vehicle.plate) },
                             onShareHistory = {
-                                uriHandler.openUri(currentState.vehicle.toWhatsAppShareUrl())
+                                uriHandler.openUri(
+                                    "https://wa.me/?text=${shareMessage.urlEncoded()}"
+                                )
                             }
                         )
 
                         MaintenanceTimeline(
-                            maintenances = currentState.vehicle.maintenances.orEmpty()
+                            maintenances = vehicle.maintenances.orEmpty()
                         )
                     }
                 }
             }
         }
     }
-}
-
-private fun Vehicle.toWhatsAppShareUrl(): String {
-    val maintenanceCount = maintenances?.size ?: 0
-    val message = buildString {
-        appendLine("Maintenance history")
-        appendLine("$year $brand $model")
-        appendLine("Plate: $plate")
-        append("Registered maintenance records: $maintenanceCount")
-    }
-
-    return "https://wa.me/?text=${message.urlEncoded()}"
 }
 
 private fun String.urlEncoded(): String = buildString {
@@ -176,33 +182,22 @@ private fun HomeTopBar(onLogout: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Surface(
-                modifier = Modifier.size(28.dp),
-                shape = CircleShape,
-                color = Color(0xFFE6EEF9)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.DirectionsCar,
-                    contentDescription = null,
-                    tint = HomeBlue,
-                    modifier = Modifier.padding(6.dp)
-                )
-            }
+            VehicleHistoryMark(
+                modifier = Modifier.size(30.dp),
+                elevation = 4.dp
+            )
             Text(
-                text = "AutoLog",
+                text = stringResource(Res.string.app_name),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Black,
                 color = HomeBlue
             )
         }
 
-        IconButton(onClick = onLogout) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.Logout,
-                contentDescription = "Logout",
-                tint = HomeBlue
-            )
-        }
+        LogoutOverflowMenu(
+            onLogout = onLogout,
+            iconTint = HomeBlue
+        )
     }
 }
 
@@ -239,13 +234,18 @@ private fun VehicleHeroCard(
             ) {
                 Column {
                     Text(
-                        text = "${vehicle.year} ${vehicle.brand} ${vehicle.model}",
+                        text = stringResource(
+                            Res.string.vehicle_year_name,
+                            vehicle.year,
+                            vehicle.brand,
+                            vehicle.model
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF111827)
                     )
                     Text(
-                        text = "PLATE ${vehicle.plate}",
+                        text = stringResource(Res.string.vehicle_plate_value, vehicle.plate),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = HomeMuted
@@ -254,13 +254,16 @@ private fun VehicleHeroCard(
 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "${vehicle.currentOdometerText()} km",
+                        text = stringResource(
+                            Res.string.vehicle_odometer_km,
+                            vehicle.currentOdometerText()
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = HomeBlue
                     )
                     Text(
-                        text = "Current Odometer",
+                        text = stringResource(Res.string.maintenance_current_odometer),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFF111827)
                     )
@@ -274,12 +277,12 @@ private fun VehicleHeroCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Maintenance Health",
+                    text = stringResource(Res.string.maintenance_health),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF111827)
                 )
                 Text(
-                    text = "82%",
+                    text = stringResource(Res.string.maintenance_health_value),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = HomeBlue
@@ -313,7 +316,7 @@ private fun VehicleHeroCard(
                 Icon(Icons.Default.Add, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Add Maintenance",
+                    text = stringResource(Res.string.action_add_maintenance),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -336,7 +339,7 @@ private fun VehicleHeroCard(
                 Icon(Icons.Default.IosShare, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    text = "Share History",
+                    text = stringResource(Res.string.action_share_history),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -362,7 +365,7 @@ private fun Vehicle.currentOdometerText(): String {
 private fun MaintenanceTimeline(maintenances: List<Maintenance>) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Text(
-            text = "Maintenance History",
+            text = stringResource(Res.string.maintenance_history),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Medium,
             color = Color(0xFF111827)
@@ -371,7 +374,25 @@ private fun MaintenanceTimeline(maintenances: List<Maintenance>) {
         val items = if (maintenances.isEmpty()) {
             sampleMaintenanceItems()
         } else {
-            maintenances.map { TimelineMaintenance.Real(it) }
+            maintenances.map { maintenance ->
+                TimelineMaintenance.Real(
+                    maintenance = maintenance,
+                    subtitle = maintenance.mileage?.let { mileage ->
+                        stringResource(
+                            Res.string.home_real_maintenance_subtitle,
+                            maintenance.date,
+                            mileage
+                        )
+                    } ?: maintenance.date,
+                    amount = maintenance.totalValue?.let { totalValue ->
+                        stringResource(
+                            Res.string.home_real_maintenance_amount,
+                            totalValue.toString()
+                        )
+                    },
+                    tags = listOf(stringResource(Res.string.home_tag_routine))
+                )
+            }
         }
 
         items.forEachIndexed { index, item ->
@@ -442,9 +463,12 @@ private fun TimelineItem(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.Top
                         ) {
-                            StatusPill("Scheduled")
+                            StatusPill(stringResource(Res.string.home_status_scheduled))
                             Text(
-                                text = "Next: ${item.nextDate}",
+                                text = stringResource(
+                                    Res.string.maintenance_next_date,
+                                    item.nextDate
+                                ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color(0xFF111827),
                                 modifier = Modifier.widthIn(max = 112.dp)
@@ -560,14 +584,14 @@ private fun EmptyHomeState(
         }
 
         Text(
-            text = "Register your vehicle",
+            text = stringResource(Res.string.home_register_title),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
         )
 
         Text(
-            text = "Your maintenance history stays private and can be shared only when you choose.",
+            text = stringResource(Res.string.home_register_description),
             style = MaterialTheme.typography.bodyMedium,
             color = HomeMuted,
             textAlign = TextAlign.Center,
@@ -580,14 +604,14 @@ private fun EmptyHomeState(
         ) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text("Register vehicle")
+            Text(stringResource(Res.string.action_register_vehicle))
         }
     }
 }
 
 @Composable
 private fun ErrorState(
-    message: String,
+    message: StringResource,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -599,7 +623,7 @@ private fun ErrorState(
             .padding(24.dp)
     ) {
         Text(
-            text = message,
+            text = stringResource(message),
             color = MaterialTheme.colorScheme.onErrorContainer,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(16.dp)
@@ -625,22 +649,22 @@ private fun HomeBottomBar() {
             BottomBarItem(
                 selected = true,
                 icon = Icons.Default.DirectionsCar,
-                label = "Garage"
+                label = stringResource(Res.string.home_nav_garage)
             )
             BottomBarItem(
                 selected = false,
                 icon = Icons.Default.History,
-                label = "History"
+                label = stringResource(Res.string.home_nav_history)
             )
             BottomBarItem(
                 selected = false,
                 icon = Icons.Default.ShoppingBag,
-                label = "Market"
+                label = stringResource(Res.string.home_nav_market)
             )
             BottomBarItem(
                 selected = false,
                 icon = Icons.Default.Settings,
-                label = "Settings"
+                label = stringResource(Res.string.home_nav_settings)
             )
         }
     }
@@ -705,17 +729,14 @@ private sealed interface TimelineMaintenance {
     }
 
     data class Real(
-        val maintenance: Maintenance
+        val maintenance: Maintenance,
+        override val subtitle: String,
+        override val amount: String?,
+        override val tags: List<String>
     ) : TimelineMaintenance {
         override val title: String = maintenance.description
-        override val subtitle: String = buildString {
-            append(maintenance.date)
-            maintenance.mileage?.let { append(" • $it km") }
-        }
         override val description: String = maintenance.description
-        override val amount: String? = maintenance.totalValue?.let { "$${it}" }
         override val workshop: String? = maintenance.workshopName
-        override val tags: List<String> = listOf("Routine")
     }
 
     data class Sample(
@@ -728,35 +749,57 @@ private sealed interface TimelineMaintenance {
     ) : TimelineMaintenance
 }
 
+@Composable
 private fun sampleMaintenanceItems(): List<TimelineMaintenance> = listOf(
     TimelineMaintenance.Scheduled(
-        title = "Annual Inspection",
+        title = stringResource(Res.string.home_sample_annual_inspection),
         subtitle = "",
-        description = "Recommended multi-point inspection to maintain warranty standards and vehicle safety.",
-        nextDate = "Dec 15, 2023"
+        description = stringResource(Res.string.home_sample_annual_inspection_description),
+        nextDate = stringResource(Res.string.home_sample_next_date)
     ),
     TimelineMaintenance.Sample(
-        title = "Oil & Filter Change",
-        subtitle = "Oct 12, 2023 • 42,000 km",
-        description = "Standard synthetic oil change including new oil filter and fluid top-up.",
-        amount = "$85.00",
-        workshop = "City Auto Care",
-        tags = listOf("Engine", "Routine")
+        title = stringResource(Res.string.home_sample_oil_change),
+        subtitle = stringResource(Res.string.home_sample_oil_change_subtitle),
+        description = stringResource(Res.string.home_sample_oil_change_description),
+        amount = stringResource(Res.string.home_sample_oil_change_amount),
+        workshop = stringResource(Res.string.home_sample_oil_change_workshop),
+        tags = listOf(
+            stringResource(Res.string.home_tag_engine),
+            stringResource(Res.string.home_tag_routine)
+        )
     ),
     TimelineMaintenance.Sample(
-        title = "Brake Pad Replacement",
-        subtitle = "July 05, 2023 • 38,500 km",
-        description = "Front brake pads replaced with ceramic components. Rotors inspected.",
-        amount = "$210.00",
-        workshop = "Brake Pros HQ",
-        tags = listOf("Safety", "Repair")
+        title = stringResource(Res.string.home_sample_brake_replacement),
+        subtitle = stringResource(Res.string.home_sample_brake_replacement_subtitle),
+        description = stringResource(Res.string.home_sample_brake_replacement_description),
+        amount = stringResource(Res.string.home_sample_brake_replacement_amount),
+        workshop = stringResource(Res.string.home_sample_brake_replacement_workshop),
+        tags = listOf(
+            stringResource(Res.string.home_tag_safety),
+            stringResource(Res.string.home_tag_repair)
+        )
     ),
     TimelineMaintenance.Sample(
-        title = "Tire Rotation & Balance",
-        subtitle = "March 14, 2023 • 35,000 km",
-        description = "Standard tire rotation to ensure even wear across all four tires.",
-        amount = "$45.00",
-        workshop = "Quick Service Express",
-        tags = listOf("Wheels")
+        title = stringResource(Res.string.home_sample_tire_rotation),
+        subtitle = stringResource(Res.string.home_sample_tire_rotation_subtitle),
+        description = stringResource(Res.string.home_sample_tire_rotation_description),
+        amount = stringResource(Res.string.home_sample_tire_rotation_amount),
+        workshop = stringResource(Res.string.home_sample_tire_rotation_workshop),
+        tags = listOf(stringResource(Res.string.home_tag_wheels))
     )
 )
+
+@Preview
+@Composable
+private fun VehicleHomeScreenPreview() {
+    val viewModel = remember { VehicleHomeViewModel(PreviewVehicleRepository) }
+
+    VehicleMaintenanceTheme {
+        VehicleHomeScreen(
+            viewModel = viewModel,
+            onRegisterVehicle = {},
+            onAddMaintenance = {},
+            onLogout = {}
+        )
+    }
+}

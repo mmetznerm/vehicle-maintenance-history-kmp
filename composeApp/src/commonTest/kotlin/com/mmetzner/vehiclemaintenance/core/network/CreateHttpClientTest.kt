@@ -5,6 +5,7 @@ import com.mmetzner.vehiclemaintenance.core.auth.InMemoryAuthTokenStore
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.request.get
+import io.ktor.client.request.post
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
@@ -80,6 +81,29 @@ class CreateHttpClientTest {
         )
 
         client.get("https://example.com/v1/auth/register")
+
+        assertNull(authorizationHeader)
+    }
+
+    @Test
+    fun `does not add bearer token to logout request`() = runTest {
+        val tokenStore = InMemoryAuthTokenStore()
+        tokenStore.saveTokens(AuthTokens(accessToken = "access-token"))
+
+        var authorizationHeader: String? = null
+        val client = createHttpClient(
+            authTokenStore = tokenStore,
+            engine = MockEngine { request ->
+                authorizationHeader = request.headers[HttpHeaders.Authorization]
+                respond(
+                    content = "{}",
+                    status = HttpStatusCode.NoContent,
+                    headers = headersOf(HttpHeaders.ContentType, "application/json")
+                )
+            }
+        )
+
+        client.post("https://example.com/v1/auth/logout")
 
         assertNull(authorizationHeader)
     }

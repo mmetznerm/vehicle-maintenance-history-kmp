@@ -1,26 +1,29 @@
 package com.mmetzner.vehiclemaintenance.core.network
 
-fun Throwable?.toLoginErrorMessage(): String {
+import org.jetbrains.compose.resources.StringResource
+import vehiclemaintenance.composeapp.generated.resources.*
+
+fun Throwable?.toLoginErrorMessage(): StringResource {
     return when (this) {
         is NetworkRequestException -> when (statusCode) {
-            400, 401, 403 -> "Invalid email or password."
-            in 500..599 -> "Authentication service is temporarily unavailable."
-            else -> "Could not sign in. Try again in a moment."
+            400, 401, 403 -> Res.string.error_invalid_credentials
+            in 500..599 -> Res.string.error_auth_service_unavailable
+            else -> Res.string.error_sign_in_failed
         }
 
-        else -> "Could not connect to the server. Check your connection and try again."
+        else -> Res.string.error_server_connection
     }
 }
 
-fun Throwable?.toVehicleSearchErrorMessage(): String {
+fun Throwable?.toVehicleSearchErrorMessage(): StringResource {
     return when (this) {
         is NetworkRequestException -> when (statusCode) {
-            401, 403 -> "Your session expired. Please sign in again."
-            404 -> "Vehicle not found and no local copy is available."
-            in 500..599 -> "Vehicle service is temporarily unavailable and no local copy is available."
-            else -> "Could not sync vehicle data and no local copy is available."
+            401, 403 -> Res.string.error_session_expired
+            404 -> Res.string.error_vehicle_not_found_no_cache
+            in 500..599 -> Res.string.error_vehicle_service_unavailable
+            else -> Res.string.error_vehicle_sync_failed
         }
 
-        else -> "You are offline and this vehicle is not available in the local cache."
+        else -> Res.string.error_vehicle_offline_no_cache
     }
 }

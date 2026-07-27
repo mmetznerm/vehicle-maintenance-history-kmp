@@ -1,5 +1,7 @@
 package com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.addmaintenance
 
+import org.jetbrains.compose.resources.StringResource
+
 data class AddMaintenanceState(
     val vehiclePlate: String = "",
     val date: String = "",
@@ -7,6 +9,6 @@ data class AddMaintenanceState(
     val description: String = "",
     val totalValue: String = "",
     val isSaving: Boolean = false,
-    val error: String? = null,
+    val error: StringResource? = null,
     val success: Boolean = false
 )
