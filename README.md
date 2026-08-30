@@ -21,6 +21,16 @@ The project is a work in progress focused on a shared mobile codebase and an inc
 
 Kotlin Multiplatform, Compose Multiplatform, Material 3, Ktor Client, Room Multiplatform, Koin, Coroutines/Flow, Kotlinx Serialization, and Gradle Kotlin DSL.
 
+## Screenshots
+
+| Sign-in screen | Dashboard | Vehicle details |
+| :---: | :---: | :---: |
+| <img src="docs/images/portfolio/login.png" width="240" alt="Sign-in screen" /> | <img src="docs/images/portfolio/dashboard.png" width="240" alt="Dashboard" /> | <img src="docs/images/portfolio/vehicle-details.png" width="240" alt="Vehicle details" /> |
+
+| Vehicle registration | Maintenance registration |
+| :---: | :---: |
+| <img src="docs/images/portfolio/vehicle-form.png" width="240" alt="Vehicle registration" /> | <img src="docs/images/portfolio/maintenance-form.png" width="240" alt="Maintenance registration" /> |
+
 ## Run locally
 
 Prerequisites: a current Android Studio installation and a compatible JDK. Xcode is also required to run the iOS target.

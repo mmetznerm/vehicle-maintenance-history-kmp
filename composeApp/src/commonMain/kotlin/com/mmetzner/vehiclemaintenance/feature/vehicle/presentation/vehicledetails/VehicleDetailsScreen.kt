@@ -338,30 +338,25 @@ private fun VehicleSummaryCard(
                 )
             }
 
-            Row(
+            FilledTonalButton(
+                onClick = onEditVehicle,
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
-                FilledTonalButton(
-                    onClick = onEditVehicle,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Icon(Icons.Default.Edit, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(Res.string.action_edit))
-                }
+                Icon(Icons.Default.Edit, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(Res.string.action_edit))
+            }
 
-                Button(
-                    onClick = onAddMaintenance,
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = DetailsBlue)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(Res.string.action_maintenance))
-                }
+            Button(
+                onClick = onAddMaintenance,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = DetailsBlue)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(Res.string.action_maintenance))
             }
         }
     }
