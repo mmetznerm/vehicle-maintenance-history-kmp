@@ -19,6 +19,8 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.CreateMai
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.dto.CreateVehicleRequest
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.MaintenanceRepository
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.SyncRepository
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +40,7 @@ class VehicleRepositoryImpl(
     private val vehicleDao: VehicleDao,
     private val outboxDao: OutboxDao,
     private val syncScheduler: OutboxSyncRequestScheduler
-) : VehicleRepository {
+) : VehicleRepository, MaintenanceRepository, SyncRepository {
 
     private val syncScope = CoroutineScope(Dispatchers.IO)
     private val syncMutex = Mutex()

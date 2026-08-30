@@ -2,6 +2,7 @@ package com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.SyncRepository
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,7 +11,8 @@ import kotlinx.coroutines.launch
 import vehiclemaintenance.composeapp.generated.resources.*
 
 class VehicleHomeViewModel(
-    private val repository: VehicleRepository
+    private val repository: VehicleRepository,
+    private val syncRepository: SyncRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<VehicleHomeState>(VehicleHomeState.Loading)
@@ -41,7 +43,7 @@ class VehicleHomeViewModel(
 
     fun syncPendingChanges() {
         viewModelScope.launch {
-            repository.syncPendingOutbox()
+            syncRepository.syncPendingOutbox()
         }
     }
 }

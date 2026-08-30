@@ -529,7 +529,7 @@ private fun Vehicle.currentOdometerText(): String {
 @Preview
 @Composable
 private fun VehicleListScreenPreview() {
-    val viewModel = remember { VehicleListViewModel(PreviewVehicleRepository) }
+    val viewModel = remember { VehicleListViewModel(PreviewVehicleRepository, PreviewVehicleRepository) }
 
     VehicleMaintenanceTheme {
         VehicleListScreen(

@@ -40,7 +40,7 @@ class VehicleListViewModelTest {
             Vehicle("ABC1234", "Civic", "Honda", 2022, emptyList())
         )
 
-        val viewModel = VehicleListViewModel(repository)
+        val viewModel = VehicleListViewModel(repository, repository)
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.isLoading)
@@ -54,7 +54,7 @@ class VehicleListViewModelTest {
         repository.databaseListFlow.value = emptyList()
         repository.networkResult = Result.failure(Exception("No internet"))
 
-        val viewModel = VehicleListViewModel(repository)
+        val viewModel = VehicleListViewModel(repository, repository)
         advanceUntilIdle()
 
         assertFalse(viewModel.state.value.isLoading)

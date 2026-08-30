@@ -792,7 +792,7 @@ private fun sampleMaintenanceItems(): List<TimelineMaintenance> = listOf(
 @Preview
 @Composable
 private fun VehicleHomeScreenPreview() {
-    val viewModel = remember { VehicleHomeViewModel(PreviewVehicleRepository) }
+    val viewModel = remember { VehicleHomeViewModel(PreviewVehicleRepository, PreviewVehicleRepository) }
 
     VehicleMaintenanceTheme {
         VehicleHomeScreen(

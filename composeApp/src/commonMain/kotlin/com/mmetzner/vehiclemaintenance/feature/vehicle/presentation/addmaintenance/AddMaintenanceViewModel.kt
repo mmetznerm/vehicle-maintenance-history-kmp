@@ -3,7 +3,7 @@
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
-import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.MaintenanceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +13,7 @@ import org.jetbrains.compose.resources.StringResource
 import vehiclemaintenance.composeapp.generated.resources.*
 
 class AddMaintenanceViewModel(
-    private val repository: VehicleRepository
+    private val maintenanceRepository: MaintenanceRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddMaintenanceState())
@@ -41,7 +41,7 @@ class AddMaintenanceViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true, error = null) }
             try {
-                repository.addMaintenance(
+                maintenanceRepository.addMaintenance(
                     vehiclePlate = s.vehiclePlate,
                     maintenance = Maintenance(
                         id = "", // Repository will generate UUID

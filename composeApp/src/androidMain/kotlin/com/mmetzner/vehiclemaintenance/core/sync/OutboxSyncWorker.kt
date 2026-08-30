@@ -3,7 +3,7 @@ package com.mmetzner.vehiclemaintenance.core.sync
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.SyncRepository
 import org.koin.core.context.GlobalContext
 
 class OutboxSyncWorker(
@@ -13,8 +13,8 @@ class OutboxSyncWorker(
 
     override suspend fun doWork(): Result {
         return try {
-            val repository = GlobalContext.get().get<VehicleRepository>()
-            repository.syncPendingOutbox()
+            val syncRepository = GlobalContext.get().get<SyncRepository>()
+            syncRepository.syncPendingOutbox()
             Result.success()
         } catch (e: Exception) {
             if (runAttemptCount >= MAX_RUN_ATTEMPTS) {

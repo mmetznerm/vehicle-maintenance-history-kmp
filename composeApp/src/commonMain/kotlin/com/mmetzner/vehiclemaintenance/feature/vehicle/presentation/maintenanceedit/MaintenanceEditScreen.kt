@@ -397,7 +397,7 @@ private fun MaintenanceEditTextField(
 @Composable
 private fun MaintenanceEditScreenPreview() {
     val viewModel = remember {
-        MaintenanceEditViewModel(PreviewVehicleRepository).apply {
+        MaintenanceEditViewModel(PreviewVehicleRepository, PreviewVehicleRepository).apply {
             load(
                 vehicleId = PreviewVehicleId,
                 maintenanceId = PreviewMaintenanceId

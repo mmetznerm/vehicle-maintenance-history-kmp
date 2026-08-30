@@ -3,6 +3,8 @@ package com.mmetzner.vehiclemaintenance.core.ui.preview
 import com.mmetzner.vehiclemaintenance.feature.auth.domain.repository.AuthRepository
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.MaintenanceRepository
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.SyncRepository
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -55,7 +57,7 @@ internal object PreviewAuthRepository : AuthRepository {
     override suspend fun logout() = Unit
 }
 
-internal object PreviewVehicleRepository : VehicleRepository {
+internal object PreviewVehicleRepository : VehicleRepository, MaintenanceRepository, SyncRepository {
     override suspend fun observeVehicles(): Flow<List<Vehicle>> =
         flowOf(listOf(PreviewVehicle))
 

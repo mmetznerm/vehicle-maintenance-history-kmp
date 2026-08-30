@@ -38,7 +38,7 @@ class MaintenanceEditViewModelTest {
     fun `loads form from local maintenance cache`() = runTest {
         repository.databaseFlow.value = vehicleWithMaintenance()
 
-        val viewModel = MaintenanceEditViewModel(repository)
+        val viewModel = MaintenanceEditViewModel(repository, repository)
         viewModel.load("vehicle-id", "maintenance-remote-id")
         advanceUntilIdle()
 
@@ -54,7 +54,7 @@ class MaintenanceEditViewModelTest {
     fun `saves local changes for later synchronization`() = runTest {
         repository.databaseFlow.value = vehicleWithMaintenance()
 
-        val viewModel = MaintenanceEditViewModel(repository)
+        val viewModel = MaintenanceEditViewModel(repository, repository)
         viewModel.load("vehicle-id", "maintenance-remote-id")
         advanceUntilIdle()
 
@@ -82,7 +82,7 @@ class MaintenanceEditViewModelTest {
         val vehicle = vehicleWithMaintenance()
         repository.databaseFlow.value = vehicle
 
-        val viewModel = MaintenanceEditViewModel(repository)
+        val viewModel = MaintenanceEditViewModel(repository, repository)
         viewModel.load("vehicle-id", "maintenance-remote-id")
         advanceUntilIdle()
 

@@ -36,7 +36,7 @@ class VehicleHomeViewModelTest {
     fun `shows home content when a local vehicle exists`() = runTest {
         repository.databaseFlow.value = Vehicle("ABC1234", "Civic", "Honda", 2022, emptyList())
 
-        val viewModel = VehicleHomeViewModel(repository)
+        val viewModel = VehicleHomeViewModel(repository, repository)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value is VehicleHomeState.Content)
@@ -50,7 +50,7 @@ class VehicleHomeViewModelTest {
     fun `shows onboarding when no local vehicle exists`() = runTest {
         repository.databaseFlow.value = null
 
-        val viewModel = VehicleHomeViewModel(repository)
+        val viewModel = VehicleHomeViewModel(repository, repository)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value is VehicleHomeState.Empty)

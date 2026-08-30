@@ -2,11 +2,13 @@
 
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.MaintenanceRepository
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.SyncRepository
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeOfflineFirstRepository : VehicleRepository {
+class FakeOfflineFirstRepository : VehicleRepository, MaintenanceRepository, SyncRepository {
     val databaseFlow = MutableStateFlow<Vehicle?>(null)
     val databaseListFlow = MutableStateFlow<List<Vehicle>>(emptyList())
     var networkResult: Result<Unit> = Result.success(Unit)

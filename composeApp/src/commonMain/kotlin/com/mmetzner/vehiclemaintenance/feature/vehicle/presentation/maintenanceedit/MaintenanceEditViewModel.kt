@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.mmetzner.vehiclemaintenance.core.network.toVehicleSearchErrorMessage
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.MaintenanceRepository
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,8 @@ import org.jetbrains.compose.resources.StringResource
 import vehiclemaintenance.composeapp.generated.resources.*
 
 class MaintenanceEditViewModel(
-    private val repository: VehicleRepository
+    private val vehicleRepository: VehicleRepository,
+    private val maintenanceRepository: MaintenanceRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(MaintenanceEditState())
@@ -46,7 +48,7 @@ class MaintenanceEditViewModel(
     private fun observeVehicle(vehicleId: String, maintenanceId: String) {
         viewModelScope.launch {
             try {
-                repository.observeVehicleById(vehicleId).collect { vehicle ->
+                vehicleRepository.observeVehicleById(vehicleId).collect { vehicle ->
                     val maintenance = vehicle?.maintenances
                         ?.firstOrNull { it.id == maintenanceId || it.remoteId == maintenanceId }
                     val shouldInitialize = vehicle != null && maintenance != null && !formInitialized
@@ -81,7 +83,7 @@ class MaintenanceEditViewModel(
 
     private fun refresh(vehicleId: String) {
         viewModelScope.launch {
-            val result = repository.syncVehicleById(vehicleId)
+            val result = vehicleRepository.syncVehicleById(vehicleId)
             if (result.isFailure) {
                 _state.update {
                     it.copy(
@@ -129,7 +131,7 @@ class MaintenanceEditViewModel(
             _state.update { it.copy(isSaving = true, errorMessage = null) }
 
             try {
-                repository.updateMaintenance(
+                maintenanceRepository.updateMaintenance(
                     vehiclePlate = vehicle.plate,
                     fallbackVehicleId = vehicle.id,
                     maintenance = maintenance.copy(
@@ -168,7 +170,7 @@ class MaintenanceEditViewModel(
             _state.update { it.copy(isDeleting = true, errorMessage = null) }
 
             try {
-                repository.deleteMaintenance(
+                maintenanceRepository.deleteMaintenance(
                     vehiclePlate = vehicle.plate,
                     fallbackVehicleId = vehicle.id,
                     maintenance = maintenance
