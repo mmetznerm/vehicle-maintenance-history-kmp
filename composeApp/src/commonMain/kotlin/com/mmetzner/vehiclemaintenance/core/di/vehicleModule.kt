@@ -1,7 +1,9 @@
 package com.mmetzner.vehiclemaintenance.core.di
 
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.MaintenanceRepositoryImpl
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.VehicleRepositoryImpl
 import com.mmetzner.vehiclemaintenance.feature.vehicle.data.remote.VehicleRemoteDataSource
+import com.mmetzner.vehiclemaintenance.feature.vehicle.data.sync.OutboxSyncService
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.MaintenanceRepository
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.SyncRepository
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
@@ -13,15 +15,17 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.search.Vehic
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicledetails.VehicleDetailsViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehicleedit.VehicleEditViewModel
 import com.mmetzner.vehiclemaintenance.feature.vehicle.presentation.vehiclelist.VehicleListViewModel
+import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val vehicleModule = module {
+    single { Json { ignoreUnknownKeys = true; encodeDefaults = true } }
     single { VehicleRemoteDataSource(get(), get()) }
-    single { VehicleRepositoryImpl(get(), get(), get(), get()) }
-    single<VehicleRepository> { get<VehicleRepositoryImpl>() }
-    single<MaintenanceRepository> { get<VehicleRepositoryImpl>() }
-    single<SyncRepository> { get<VehicleRepositoryImpl>() }
+    single { OutboxSyncService(get(), get(), get(), get(), json = get()) }
+    single<SyncRepository> { get<OutboxSyncService>() }
+    single<VehicleRepository> { VehicleRepositoryImpl(get(), get(), get()) }
+    single<MaintenanceRepository> { MaintenanceRepositoryImpl(get(), get()) }
     viewModel { VehicleSearchViewModel(get()) }
     viewModel { VehicleListViewModel(get(), get()) }
     viewModel { VehicleDetailsViewModel(get()) }

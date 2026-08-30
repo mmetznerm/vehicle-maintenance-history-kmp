@@ -4,12 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.MaintenanceRepository
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.validation.MaintenanceValidator
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.validation.toCurrencyDoubleOrNull
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.StringResource
 import vehiclemaintenance.composeapp.generated.resources.*
 
 class AddMaintenanceViewModel(
@@ -32,7 +33,12 @@ class AddMaintenanceViewModel(
 
     private fun saveMaintenance() {
         val s = _state.value
-        val validationError = validateMaintenance(s)
+        val validationError = MaintenanceValidator.validate(
+            date = s.date,
+            mileage = s.mileage,
+            totalValue = s.totalValue,
+            description = s.description
+        )
         if (validationError != null) {
             _state.update { it.copy(error = validationError) }
             return
@@ -59,30 +65,6 @@ class AddMaintenanceViewModel(
             }
         }
     }
-}
-
-private fun validateMaintenance(state: AddMaintenanceState): StringResource? {
-    val mileage = state.mileage.toIntOrNull()
-    val totalValue = state.totalValue.toCurrencyDoubleOrNull()
-
-    return when {
-        state.date.isBlank() -> Res.string.error_maintenance_date_required
-        state.mileage.isBlank() -> Res.string.error_maintenance_odometer_required
-        mileage == null || mileage < 0 -> Res.string.error_maintenance_odometer_invalid
-        state.totalValue.isBlank() -> Res.string.error_maintenance_cost_required
-        totalValue == null || totalValue < 0.0 -> Res.string.error_maintenance_cost_invalid
-        state.description.isBlank() -> Res.string.error_maintenance_description_required
-        state.description.trim().length > 500 -> Res.string.error_maintenance_description_too_long
-        else -> null
-    }
-}
-
-private fun String.toCurrencyDoubleOrNull(): Double? {
-    return filter { char ->
-        char.isDigit() || char == '.' || char == ','
-    }
-        .replace(',', '.')
-        .toDoubleOrNull()
 }
 
 

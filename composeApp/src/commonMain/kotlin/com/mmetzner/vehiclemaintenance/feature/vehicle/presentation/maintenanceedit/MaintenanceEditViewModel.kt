@@ -7,6 +7,8 @@ import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Maintenance
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.model.Vehicle
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.MaintenanceRepository
 import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.repository.VehicleRepository
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.validation.MaintenanceValidator
+import com.mmetzner.vehiclemaintenance.feature.vehicle.domain.validation.toCurrencyDoubleOrNull
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -121,7 +123,12 @@ class MaintenanceEditViewModel(
             return
         }
 
-        val validationError = validateMaintenance(current)
+        val validationError = MaintenanceValidator.validate(
+            date = current.date,
+            mileage = current.mileage,
+            totalValue = current.totalValue,
+            description = current.description
+        )
         if (validationError != null) {
             _state.update { it.copy(errorMessage = validationError) }
             return
@@ -205,28 +212,4 @@ data class MaintenanceEditState(
 
 sealed interface MaintenanceEditUiEvent {
     data object NavigateBack : MaintenanceEditUiEvent
-}
-
-private fun String.toCurrencyDoubleOrNull(): Double? {
-    return filter { char ->
-        char.isDigit() || char == '.' || char == ','
-    }
-        .replace(',', '.')
-        .toDoubleOrNull()
-}
-
-private fun validateMaintenance(state: MaintenanceEditState): StringResource? {
-    val mileage = state.mileage.toIntOrNull()
-    val totalValue = state.totalValue.toCurrencyDoubleOrNull()
-
-    return when {
-        state.date.isBlank() -> Res.string.error_maintenance_date_required
-        state.mileage.isBlank() -> Res.string.error_maintenance_odometer_required
-        mileage == null || mileage < 0 -> Res.string.error_maintenance_odometer_invalid
-        state.totalValue.isBlank() -> Res.string.error_maintenance_cost_required
-        totalValue == null || totalValue < 0.0 -> Res.string.error_maintenance_cost_invalid
-        state.description.isBlank() -> Res.string.error_maintenance_description_required
-        state.description.trim().length > 500 -> Res.string.error_maintenance_description_too_long
-        else -> null
-    }
 }
