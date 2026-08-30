@@ -1,5 +1,9 @@
 # Vehicle Maintenance History — Mobile
 
+[![Mobile CI](https://github.com/mmetznerm/vehicle-maintenance-history-kmp/actions/workflows/ci.yml/badge.svg)](https://github.com/mmetznerm/vehicle-maintenance-history-kmp/actions/workflows/ci.yml)
+![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin%20Multiplatform-7F52FF)
+![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-4285F4)
+
 Kotlin Multiplatform companion app for the [Vehicle Maintenance History backend](https://github.com/mmetznerm/vehicle-maintenance-history). It lets a vehicle owner sign in, register a vehicle, and record maintenance history from Android or iOS.
 
 The project is a work in progress focused on a shared mobile codebase and an incremental local-first experience.
@@ -35,11 +39,7 @@ Run the shared tests:
 
 To run on iOS, open `iosApp` in Xcode and start a simulator.
 
-For local API calls, the Android emulator defaults to `http://10.0.2.2:8080`. You can override it in `local.properties`:
-
-```properties
-api.baseUrl=http://10.0.2.2:8080
-```
+For local API calls, add the API URL to your ignored `local.properties` file. The repository includes `local.properties.example` as a reference; keep your own `sdk.dir` entry unchanged.
 
 ## Current scope
 

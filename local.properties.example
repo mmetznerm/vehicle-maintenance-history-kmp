@@ -1,0 +1,4 @@
+# Copy this file to local.properties and keep your SDK path there.
+# Android Emulator: http://10.0.2.2:8080
+# iOS Simulator: http://localhost:8080
+api.baseUrl=http://10.0.2.2:8080
