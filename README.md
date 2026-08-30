@@ -7,6 +7,7 @@
 ![iOS](https://img.shields.io/badge/iOS-Native-000000?logo=apple&logoColor=white)
 ![Room KMP](https://img.shields.io/badge/Room-Multiplatform-4285F4?logo=sqlite&logoColor=white)
 ![Ktor](https://img.shields.io/badge/Ktor-Client-008080?logo=ktor&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 Kotlin Multiplatform companion app for the [Vehicle Maintenance History backend](https://github.com/mmetznerm/vehicle-maintenance-history). It lets a vehicle owner sign in, register a vehicle, and record maintenance history from Android or iOS.
 
@@ -21,6 +22,36 @@ The project is a work in progress focused on a shared mobile codebase, Clean Arc
 - Local persistence with Room Multiplatform & SQLite bundled driver
 - Offline-first Outbox Pattern queueing local changes for background server sync
 - Shared networking with Ktor Client and JWT token storage abstraction
+
+## Architecture & Data Flow
+
+```mermaid
+graph TD
+    subgraph Presentation Layer
+        UI[Compose Multiplatform UI]
+        VM[ViewModels / StateFlow]
+    end
+
+    subgraph Domain Layer
+        RepoInt[Repository Interfaces]
+        Models[Domain Models]
+    end
+
+    subgraph Data Layer
+        RepoImpl[Repository Implementation]
+        Room[(Room KMP Database)]
+        Outbox[Outbox Sync Scheduler]
+        Ktor[Ktor Client REST Engine]
+    end
+
+    UI --> VM
+    VM --> RepoInt
+    RepoInt --> RepoImpl
+    RepoImpl --> Room
+    RepoImpl --> Outbox
+    Outbox --> Ktor
+    Ktor -->|JWT Auth REST API| Backend[Spring Boot Backend]
+```
 
 ## Stack
 
@@ -69,6 +100,12 @@ For local API calls, add the API URL to your ignored `local.properties` file. Th
 ## Current scope
 
 Local vehicle and maintenance flows are implemented. Backend synchronization, refresh-token handling, resilient offline retries, image upload, and iOS Keychain storage are planned next.
+
+## Documentation & Architecture
+
+- [Architecture Decision Records (ADRs)](docs/adr/)
+- [Pull Request Template](.github/pull_request_template.md)
+- [Security Policy](SECURITY.md)
 
 ## Related project
 
