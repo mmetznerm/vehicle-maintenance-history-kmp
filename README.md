@@ -103,6 +103,7 @@ Local vehicle and maintenance flows are implemented. Backend synchronization, re
 
 ## Documentation & Architecture
 
+- [Mobile Technical Roadmap](docs/mobile-roadmap.md)
 - [Architecture Decision Records (ADRs)](docs/adr/)
 - [Pull Request Template](.github/pull_request_template.md)
 - [Security Policy](SECURITY.md)
